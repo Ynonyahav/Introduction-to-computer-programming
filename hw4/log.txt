@@ -1,0 +1,236 @@
+* commit 2579cf87afce31e84af1cd332bce8eb52fa0f82e
+| Author: yinon <yinon.yahav@campus.technion.ac.il>
+| Date:   Mon Aug 19 06:18:09 2024 +0300
+| 
+|     Added documentation comments and new dry file for the project
+| 
+|  Events/Event.h          |  28 ++++++++-
+|  Events/EventFactory.h   |  42 +++++++++++++-
+|  Events/Monster.cpp      |   8 +--
+|  Events/Monster.h        | 145 ++++++++++++++++++++++++++++++++++++++++------
+|  Events/SpecialEvent.h   |  62 +++++++++++++++++---
+|  MatamStory.h            |  87 ++++++++++++++++------------
+|  Players/Character.h     |  12 +++-
+|  Players/Job.h           |  49 ++++++++++++++--
+|  Players/Player.h        | 125 +++++++++++++++++++++++++--------------
+|  Players/PlayerFactory.h |  33 ++++++++++-
+|  dry.pdf                 | Bin 0 -> 348798 bytes
+|  11 files changed, 472 insertions(+), 119 deletions(-)
+| 
+* commit 6a54d5fa9f1cfc9e5604fe33999ec3705c15f997
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Mon Aug 19 04:39:10 2024 +0300
+| 
+|     passed for various edge cases, and speration of Monster and SpecialEvent from base class Event
+| 
+|  Events/Event.cpp          | 360 +-------------------------------------------
+|  Events/Event.h            | 147 +-----------------
+|  Events/EventFactory.cpp   |   3 +
+|  Events/Monster.cpp        | 261 ++++++++++++++++++++++++++++++++
+|  Events/Monster.h          |  99 ++++++++++++
+|  Events/SpecialEvent.cpp   | 125 +++++++++++++++
+|  Events/SpecialEvent.h     |  54 +++++++
+|  MatamStory.cpp            |  22 +--
+|  MatamStory.h              |   1 +
+|  Players/Job.cpp           |   9 +-
+|  Players/Job.h             |   4 +-
+|  Players/Player.cpp        |  12 +-
+|  Players/PlayerFactory.cpp |   1 +
+|  13 files changed, 570 insertions(+), 528 deletions(-)
+| 
+* commit 3a8fb71cd61a1716bcc7e38065cbf6c03d8500dc
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Sun Aug 18 23:53:54 2024 +0300
+| 
+|     final commit for submission
+| 
+|  Events/Event.cpp          | 305 +++++++++++++++++++++++++++++---------------
+|  Events/Event.h            |   4 +-
+|  Events/EventFactory.cpp   |  64 ++++++++++
+|  Events/EventFactory.h     |  39 ++++++
+|  MatamStory.cpp            |  49 +++----
+|  MatamStory.h              |   1 +
+|  Players/Player.cpp        |  56 ++++++--
+|  Players/Player.h          |   5 +-
+|  Players/PlayerFactory.cpp |  66 ++++++++++
+|  Players/PlayerFactory.h   |  40 ++++++
+|  10 files changed, 480 insertions(+), 149 deletions(-)
+| 
+* commit d3721e857a2c0fec9fc059c9d8575b2583c7632d
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Sun Aug 18 18:06:14 2024 +0300
+| 
+|     [Improved code Modularity] passed all given tests
+| 
+|  Events/Event.h          |  47 +++++++++++++++------
+|  MatamStory.cpp          |  14 +++----
+|  ObjectFactory.cpp       |  55 +++++++++++++++++++------
+|  ObjectFactory.h         |  10 +++--
+|  Players/Character.cpp   |  27 ------------
+|  Players/Character.h     |  11 ++---
+|  Players/Job.cpp         |  74 +++++++++++++++++----------------
+|  Players/Job.h           |  26 ++++++------
+|  Players/Player.cpp      | 103 +++++++++++++++-------------------------------
+|  Players/Player.h        |  24 ++++-------
+|  Players/PlayerFactory.h |  61 ---------------------------
+|  11 files changed, 187 insertions(+), 265 deletions(-)
+| 
+* commit 02f2384e471fe1189e587eb842d14c3cf09270de
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Thu Aug 15 20:10:03 2024 +0300
+| 
+|     [BUGS FIXED] A fully working game. Working still on modularity
+| 
+|  Events/Event.h        | 11 ++++++++++-
+|  Players/Character.cpp | 11 ++++++-----
+|  Players/Player.cpp    |  9 +++++----
+|  Players/Player.h      |  1 +
+|  4 files changed, 22 insertions(+), 10 deletions(-)
+| 
+* commit bc0b2475bdee6e08adaef18e83a0fecfb2302d18
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Thu Aug 15 00:28:56 2024 +0300
+| 
+|     a working program: passed given test1 and valgrinf
+| 
+|  Events/Event.h        | 63 +++++++++++++++++++++++--------------------------
+|  MatamStory.cpp        | 14 +++++++----
+|  MatamStory.h          |  9 ++++---
+|  ObjectFactory.cpp     | 10 ++++----
+|  Players/Character.cpp |  4 ++--
+|  Players/Character.h   |  8 +++----
+|  Players/Job.cpp       | 31 ++++++++++--------------
+|  Players/Job.h         | 38 ++++++++++++++---------------
+|  Players/Player.cpp    | 46 ++++++++++++++++++------------------
+|  Players/Player.h      | 28 +++++++++++-----------
+|  10 files changed, 124 insertions(+), 127 deletions(-)
+| 
+* commit 18d6cd4dcfc98b722355265828514ba25391e62f
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Tue Aug 13 22:43:42 2024 +0300
+| 
+|     passed compilation, no tests or runs done yet
+| 
+|  Events/Event.cpp | 19 ++++++++++++++++---
+|  Players/Job.h    | 17 ++++++++++-------
+|  2 files changed, 26 insertions(+), 10 deletions(-)
+| 
+* commit a6940e75a7245a9c42b3f65f6dc094da0aafc0e6
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Tue Aug 13 22:26:22 2024 +0300
+| 
+|     passed compilation, no tests or runs done yet
+| 
+|  Events/Event.cpp   | 255 ++++++++++++++++++++++++++++++++++++++++++++++++---
+|  Events/Event.h     | 132 ++++++++++----------------
+|  MatamStory.cpp     |  27 +++---
+|  ObjectFactory.cpp  |   8 +-
+|  Players/Job.cpp    |  15 ++-
+|  Players/Player.cpp |  42 +++++++--
+|  Players/Player.h   |  12 ++-
+|  7 files changed, 364 insertions(+), 127 deletions(-)
+| 
+* commit 6adc8a0eb95f600f21e37d2209f1da5e859c5cae
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Mon Aug 12 16:06:18 2024 +0300
+| 
+|     suggestion pack solution
+| 
+|  Events/Event.cpp | 49 +++++++++++++++++++++++++++++++++++++++++++++++++
+|  Events/Event.h   | 45 ++++++++++++++++++++++-----------------------
+|  2 files changed, 71 insertions(+), 23 deletions(-)
+| 
+* commit 275413189a5bfc3de1974c676e8f3e43b8c3c231
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Sun Aug 11 23:24:00 2024 +0300
+| 
+|     Update
+| 
+|  CMakeLists.txt     |  1 +
+|  Events/Event.cpp   |  5 +++++
+|  Events/Event.h     | 18 ++++++++----------
+|  Players/Job.cpp    | 10 +++++-----
+|  Players/Job.h      |  8 ++++----
+|  Players/Player.cpp | 12 ++++++------
+|  Players/Player.h   |  4 ++--
+|  7 files changed, 31 insertions(+), 27 deletions(-)
+| 
+* commit fc6be1450157d2a037910af799588b507a9a989e
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Sun Aug 11 22:47:47 2024 +0300
+| 
+|     Progress
+| 
+|  CMakeLists.txt        |   5 ++
+|  Events/Event.h        |  34 +++++++-----
+|  MatamStory.cpp        | 141 +++++++++++++++++++++++++++---------------------
+|  MatamStory.h          |  17 ++----
+|  ObjectFactory.cpp     |  86 +++++++++++++++++++++++++++++
+|  ObjectFactory.h       |  74 +------------------------
+|  Players/Character.cpp |  26 +++++++++
+|  Players/Character.h   |  14 ++---
+|  Players/Job.cpp       |  94 ++++++++++++++++++++++++++++++++
+|  Players/Job.h         |  50 ++++++++---------
+|  Players/Player.cpp    | 115 +++++++++++++++++++++++----------------
+|  Players/Player.h      |  57 +++++++++-----------
+|  12 files changed, 445 insertions(+), 268 deletions(-)
+| 
+* commit b9c871bdc5967cfdb990a692816cee9ea2eac97a
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Thu Aug 8 17:49:35 2024 +0300
+| 
+|     config file
+| 
+|  CMakeLists.txt | 21 +++++++++++++++++++++
+|  1 file changed, 21 insertions(+)
+| 
+* commit 543725e3dab207c98a5a81d0eb84cc8de77888d8
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Thu Aug 8 17:44:42 2024 +0300
+| 
+|     first impressions
+| 
+|  Events/Event.h          | 164 ++++++++++++++++++++++++++++++++++++++++++++--
+|  MatamStory.cpp          | 122 ++++++++++++++++++++++++++--------
+|  MatamStory.h            |  60 ++++++++++++-----
+|  ObjectFactory.h         | 118 +++++++++++++++++++++++++++++++++
+|  Players/Character.h     |  43 ++++++++++++
+|  Players/Job.h           |  64 ++++++++++++++++++
+|  Players/Player.cpp      | 133 +++++++++++++++++++++++++++++++++++++
+|  Players/Player.h        |  81 +++++++++++++++++------
+|  Players/PlayerFactory.h |  61 +++++++++++++++++
+|  test.cpp                |   3 +
+|  10 files changed, 782 insertions(+), 67 deletions(-)
+| 
+* commit 6d0b58bcecef6fc2291c09f654a978cc382c3e31
+| Author: AdiHarif <adi.harif@campus.technion.ac.il>
+| Date:   Mon Jul 29 21:47:45 2024 +0300
+| 
+|     Adds supplied files
+| 
+|  Events/Event.h       |  14 +++++
+|  MatamStory.cpp       |  74 +++++++++++++++++++++++++
+|  MatamStory.h         |  55 +++++++++++++++++++
+|  Players/Player.h     |  51 +++++++++++++++++
+|  Utilities.cpp        | 117 +++++++++++++++++++++++++++++++++++++++
+|  Utilities.h          | 146 +++++++++++++++++++++++++++++++++++++++++++++++++
+|  main.cpp             |  40 ++++++++++++++
+|  tests/test1.events   |   5 ++
+|  tests/test1.expected |  96 ++++++++++++++++++++++++++++++++
+|  tests/test1.players  |   3 +
+|  tests/test2.events   |   4 ++
+|  tests/test2.expected |   1 +
+|  tests/test2.players  |   3 +
+|  tests/test3.events   |   5 ++
+|  tests/test3.expected |   1 +
+|  tests/test3.players  |   2 +
+|  16 files changed, 617 insertions(+)
+| 
+* commit beadb33ed4c7dd2da9d4078b9de6253232c67a46
+  Author: AdiHarif <adi.harif@campus.technion.ac.il>
+  Date:   Mon Jul 29 21:46:59 2024 +0300
+  
+      Initial Commit - Adds README.md file
+  
+   README.md | 7 +++++++
+   1 file changed, 7 insertions(+)

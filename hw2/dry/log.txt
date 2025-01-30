@@ -1,0 +1,3802 @@
+* commit 10c7b5f25f181600e931f787fe111ef255ae9edc
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Wed Jul 17 14:23:50 2024 +0300
+| 
+|     [Update] Code conventions
+| 
+| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| index d0618f3..2537da6 100644
+| --- a/dry/Pirate.cpp
+| +++ b/dry/Pirate.cpp
+| @@ -7,11 +7,11 @@ Pirate::Pirate() : bounty(0), ownedDevilFruit(SECRET_FRUIT) {}
+|  
+|  Pirate::Pirate(const string& name,
+|      const int bounty,
+| -    const DEVIL_FRUIT devilFruit):
+| +    const DevilFruit devilFruit):
+|      name(name), bounty(bounty), ownedDevilFruit(devilFruit) {}
+|  
+|  
+| -void Pirate::setName(const string& name){
+| +void Pirate::setName(const string& name) {
+|      this->name = name;
+|  }
+|  
+| @@ -30,7 +30,7 @@ int Pirate::getBounty() const {
+|      return bounty;
+|  }
+|  
+| -void Pirate::setDevilFruit(const DEVIL_FRUIT devilFruit) {
+| +void Pirate::setDevilFruit(const DevilFruit devilFruit) {
+|      this->ownedDevilFruit = devilFruit;
+|  }
+|  
+| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| index 5358e29..f66d2a1 100644
+| --- a/dry/Pirate.h
+| +++ b/dry/Pirate.h
+| @@ -5,23 +5,23 @@
+|  
+|  using std::string;
+|  
+| -enum DEVIL_FRUIT {
+| +enum DevilFruit {
+| +    SECRET_FRUIT,
+|      PARAMECIA,
+|      ZOAN,
+| -    LOGIA,
+| -    SECRET_FRUIT
+| +    LOGIA
+|  };
+|  
+|  class Pirate {
+|  
+|      string name;
+|      int bounty;
+| -    DEVIL_FRUIT ownedDevilFruit;
+| +    DevilFruit ownedDevilFruit;
+|  
+|  public:
+|  
+|      Pirate();
+| -    Pirate(const string& name, int bounty, DEVIL_FRUIT devilFruit);
+| +    Pirate(const string& name, int bounty, DevilFruit devilFruit);
+|      ~Pirate() = default;
+|  
+|      void setName(const string& name);
+| @@ -30,7 +30,7 @@ public:
+|      void setBounty(int bounty);
+|      int getBounty() const;
+|  
+| -    void setDevilFruit(DEVIL_FRUIT devilFruit);
+| +    void setDevilFruit(DevilFruit devilFruit);
+|      string getDevilFruit() const;
+|  
+|      friend std::ostream &operator<<(std::ostream &os, const Pirate &pirate);
+| 
+* commit 280b90c5b44e19fda1e360ec2c5caecfca8e47be
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Wed Jul 17 14:12:47 2024 +0300
+| 
+|     [Tests Update] Given tests and more_tests combined
+| 
+| diff --git a/wet/tests.cpp b/wet/tests.cpp
+| index b2eed07..18462b6 100644
+| --- a/wet/tests.cpp
+| +++ b/wet/tests.cpp
+| @@ -1,5 +1,4 @@
+|  
+| -
+|  #include <string>
+|  #include <iostream>
+|  
+| @@ -12,6 +11,13 @@ typedef bool (*testFunc)(void);
+|  bool testMatrix(std::ostream& out);
+|  bool testMataMvidia(std::ostream& out);
+|  
+| +// Test functions declarations
+| +bool testMatrixInitializationAndOperations();
+| +bool testMataMvidiaOperations();
+| +bool testMatrixTransformations();
+| +bool testNonSquareMatrixTransformations();
+| +void runAllTests();
+| +
+|  
+|  #define ASSERT_TEST(expr)                                                      \
+|  do {                                                                           \
+| @@ -26,6 +32,9 @@ do {                                                                           \
+|  int main() {
+|      testMatrix(std::cout);
+|      testMataMvidia(std::cout);
+| +
+| +    runAllTests();
+| +    cout << "All tests passed successfully!" << endl;
+|      return 0;
+|  }
+|  
+| @@ -51,6 +60,7 @@ bool testMatrix(std::ostream& out) {
+|  
+|      Matrix m4 = m1 * m2;
+|      m4 *= 1;
+| +
+|      ASSERT_TEST(m4(0,0) == 19);
+|      ASSERT_TEST(m4(0,1) == 22);
+|      ASSERT_TEST(m4(1,0) == 43);
+| @@ -65,7 +75,6 @@ bool testMatrix(std::ostream& out) {
+|      ASSERT_TEST(-m1 == m1*-1);
+|  
+|      ASSERT_TEST(m2.rotateClockwise().rotateCounterClockwise() == m2);
+| -
+|      ASSERT_TEST(m1.transpose().transpose() == m1);
+|  
+|      out << m2 << std::endl;
+| @@ -91,8 +100,7 @@ bool testMataMvidia(std::ostream& out) {
+|      array[0] = frame1;
+|      array[1] = frame2;
+|  
+| -    MataMvidia movie("MataMatrix","Adi Harif",array, 2);
+| -
+| +    MataMvidia movie("MataMatrix","Adi Harif", array, 2);
+|      ASSERT_TEST(movie[0] == frame1);
+|  
+|      movie += frame1;
+| @@ -124,7 +132,279 @@ bool testMataMvidia(std::ostream& out) {
+|      out << movie;
+|  
+|      MataMvidia movie2 = movie + movie1;
+| +
+|      movie += movie1;
+|  
+|      return true;
+|  }
+| +
+| +//
+| +
+| +// Test matrix initialization and basic operations
+| +bool testMatrixInitializationAndOperations() {
+| +    Matrix m1(2, 2), m2(2, 2), m3;
+| +    m1(0,0) = 1; m1(0,1) = 2; m1(1,0) = 3; m1(1,1) = 4;
+| +    m2(0,0) = 5; m2(0,1) = 6; m2(1,0) = 7; m2(1,1) = 8;
+| +
+| +    // Test addition
+| +    m3 = m1 + m2;
+| +    ASSERT_TEST(m3(0,0) == 6 && m3(0,1) == 8 && m3(1,0) == 10 && m3(1,1) == 12);
+| +
+| +    // Test multiplication by scalar
+| +    m3 = m1 * 3;
+| +    ASSERT_TEST(m3(0,0) == 3 && m3(0,1) == 6 && m3(1,0) == 9 && m3(1,1) == 12);
+| +
+| +    // Test transpose
+| +    m3 = m1.transpose();
+| +    ASSERT_TEST(m3(0,0) == 1 && m3(0,1) == 3 && m3(1,0) == 2 && m3(1,1) == 4);
+| +
+| +    // Test rotation
+| +    m3 = m1.rotateClockwise();
+| +    ASSERT_TEST(m3(0,0) == 3 && m3(0,1) == 1 && m3(1,0) == 4 && m3(1,1) == 2);
+| +
+| +    return true;
+| +}
+| +
+| +// Test MataMvidia movie operations
+| +bool testMataMvidiaOperations() {
+| +    Matrix frame1(2,2), frame2(2,2);
+| +    frame1(0,0) = 1; frame1(0,1) = 2; frame1(1,0) = 3; frame1(1,1) = 4;
+| +    frame2(0,0) = 5; frame2(0,1) = 6; frame2(1,0) = 7; frame2(1,1) = 8;
+| +
+| +    Matrix frames[] = {frame1, frame2};
+| +    MataMvidia movie("Test Movie", "Author", frames, 2);
+| +
+| +    // Test movie indexing
+| +    ASSERT_TEST(movie[0] == frame1 && movie[1] == frame2);
+| +
+| +    // Test addition of frame
+| +    movie += frame1;
+| +    ASSERT_TEST(movie[2] == frame1);
+| +
+| +    return true;
+| +}
+| +
+| +bool testMatrixTransformations() {
+| +    // Create matrices of various sizes
+| +    Matrix m1(3, 3), m2(1, 4), m3(4, 1);
+| +    // Initialize m1 as a 3x3 matrix
+| +    m1(0,0) = 1; m1(0,1) = 2; m1(0,2) = 3;
+| +    m1(1,0) = 4; m1(1,1) = 5; m1(1,2) = 6;
+| +    m1(2,0) = 7; m1(2,1) = 8; m1(2,2) = 9;
+| +    // Initialize m2 as a 1x4 matrix
+| +    m2(0,0) = 1; m2(0,1) = 2; m2(0,2) = 3; m2(0,3) = 4;
+| +    // Initialize m3 as a 4x1 matrix
+| +    m3(0,0) = 1; m3(1,0) = 2; m3(2,0) = 3; m3(3,0) = 4;
+| +
+| +    // Test transpose functionality
+| +    Matrix mt1 = m1.transpose();
+| +    ASSERT_TEST(mt1(0,0) == 1 && mt1(1,0) == 2 && mt1(2,0) == 3);
+| +    ASSERT_TEST(mt1(0,1) == 4 && mt1(1,1) == 5 && mt1(2,1) == 6);
+| +    ASSERT_TEST(mt1(0,2) == 7 && mt1(1,2) == 8 && mt1(2,2) == 9);
+| +
+| +    Matrix mt2 = m2.transpose();
+| +    ASSERT_TEST(mt2(0,0) == 1 && mt2(1,0) == 2 && mt2(2,0) == 3 && mt2(3,0) == 4);
+| +
+| +    Matrix mt3 = m3.transpose();
+| +    ASSERT_TEST(mt3(0,0) == 1 && mt3(0,1) == 2 && mt3(0,2) == 3 && mt3(0,3) == 4);
+| +
+| +    // Test rotation clockwise
+| +    Matrix mcw1 = m1.rotateClockwise();
+| +    ASSERT_TEST(mcw1(0,0) == 7 && mcw1(0,1) == 4 && mcw1(0,2) == 1);
+| +    ASSERT_TEST(mcw1(1,0) == 8 && mcw1(1,1) == 5 && mcw1(1,2) == 2);
+| +    ASSERT_TEST(mcw1(2,0) == 9 && mcw1(2,1) == 6 && mcw1(2,2) == 3);
+| +
+| +    // Test rotation counterclockwise
+| +    Matrix mccw1 = m1.rotateCounterClockwise();
+| +    ASSERT_TEST(mccw1(0,0) == 3 && mccw1(0,1) == 6 && mccw1(0,2) == 9);
+| +    ASSERT_TEST(mccw1(1,0) == 2 && mccw1(1,1) == 5 && mccw1(1,2) == 8);
+| +    ASSERT_TEST(mccw1(2,0) == 1 && mccw1(2,1) == 4 && mccw1(2,2) == 7);
+| +
+| +    // Test identity rotations
+| +    Matrix mid = m1.rotateClockwise().rotateCounterClockwise();
+| +    ASSERT_TEST(mid == m1);
+| +
+| +    Matrix mid2 = m1.rotateCounterClockwise().rotateClockwise();
+| +    ASSERT_TEST(mid2 == m1);
+| +
+| +    // Test consecutive rotations
+| +    Matrix m4x4(4, 4); // Create a 4x4 matrix for testing multiple rotations
+| +    for (int i = 0; i < 4; ++i) {
+| +        for (int j = 0; j < 4; ++j) {
+| +            m4x4(i, j) = i * 4 + j + 1;
+| +        }
+| +    }
+| +    Matrix r90 = m4x4.rotateClockwise();
+| +    Matrix r180 = r90.rotateClockwise();
+| +    Matrix r270 = r180.rotateClockwise();
+| +    Matrix r360 = r270.rotateClockwise();
+| +    ASSERT_TEST(r360 == m4x4);
+| +
+| +    // Ensure transpose of transpose is original
+| +    ASSERT_TEST(m4x4.transpose().transpose() == m4x4);
+| +
+| +    return true;
+| +}
+| +
+| +bool testNonSquareMatrixTransformations() {
+| +    // Create non-square matrices
+| +    Matrix m1(2, 3), m2(3, 2);
+| +
+| +    // Initialize m1 as a 2x3 matrix
+| +    m1(0,0) = 1; m1(0,1) = 2; m1(0,2) = 3;
+| +    m1(1,0) = 4; m1(1,1) = 5; m1(1,2) = 6;
+| +
+| +    // Initialize m2 as a 3x2 matrix
+| +    m2(0,0) = 1; m2(0,1) = 2;
+| +    m2(1,0) = 3; m2(1,1) = 4;
+| +    m2(2,0) = 5; m2(2,1) = 6;
+| +
+| +    // Test transpose functionality
+| +    Matrix mt1 = m1.transpose();
+| +    ASSERT_TEST(mt1(0,0) == 1 && mt1(1,0) == 2 && mt1(2,0) == 3);
+| +    ASSERT_TEST(mt1(0,1) == 4 && mt1(1,1) == 5 && mt1(2,1) == 6);
+| +
+| +    Matrix mt2 = m2.transpose();
+| +    ASSERT_TEST(mt2(0,0) == 1 && mt2(0,1) == 3 && mt2(0,2) == 5);
+| +    ASSERT_TEST(mt2(1,0) == 2 && mt2(1,1) == 4 && mt2(1,2) == 6);
+| +
+| +    // Test scalar multiplication
+| +    Matrix ms1 = m1 * 2;
+| +    ASSERT_TEST(ms1(0,0) == 2 && ms1(0,1) == 4 && ms1(0,2) == 6);
+| +    ASSERT_TEST(ms1(1,0) == 8 && ms1(1,1) == 10 && ms1(1,2) == 12);
+| +
+| +    Matrix ms2 = m2 * 3;
+| +    ASSERT_TEST(ms2(0,0) == 3 && ms2(0,1) == 6);
+| +    ASSERT_TEST(ms2(1,0) == 9 && ms2(1,1) == 12);
+| +    ASSERT_TEST(ms2(2,0) == 15 && ms2(2,1) == 18);
+| +
+| +    // Test the transpose of the transpose returns the original matrix
+| +    ASSERT_TEST(m1.transpose().transpose() == m1);
+| +    ASSERT_TEST(m2.transpose().transpose() == m2);
+| +
+| +    // Ensure transposing multiple times toggles between the two configurations
+| +    ASSERT_TEST(m1.transpose().transpose().transpose() == m1.transpose());
+| +    ASSERT_TEST(m2.transpose().transpose().transpose() == m2.transpose());
+| +
+| +    return true;
+| +}
+| +
+| +bool testConstructorDeepCopy() {
+| +    // Testing for Matrix class
+| +    Matrix m1(2, 2);
+| +    m1(0,0) = 1; m1(0,1) = 2;
+| +    m1(1,0) = 3; m1(1,1) = 4;
+| +
+| +    // Use copy constructor
+| +    Matrix m2(m1);
+| +    // Change original matrix
+| +    m1(0,0) = 5;
+| +
+| +    // m2 should remain unchanged if a deep copy was made
+| +    ASSERT_TEST(m2(0,0) == 1);
+| +    ASSERT_TEST(m2(0,1) == 2);
+| +    ASSERT_TEST(m2(1,0) == 3);
+| +    ASSERT_TEST(m2(1,1) == 4);
+| +
+| +    // Testing for MataMvidia class
+| +    Matrix frames[] = {Matrix(1,1), Matrix(1,1)};
+| +    frames[0](0,0) = 10;
+| +    frames[1](0,0) = 20;
+| +
+| +    MataMvidia movie1("Original", "Author", frames, 2);
+| +
+| +    // Use copy constructor
+| +    MataMvidia movie2(movie1);
+| +    // Change original movie frames
+| +    movie1[0](0,0) = 30;
+| +
+| +    // movie2 should remain unchanged if a deep copy was made
+| +    ASSERT_TEST(movie2[0](0,0) == 10);
+| +    ASSERT_TEST(movie2[1](0,0) == 20);
+| +
+| +    return true;
+| +}
+| +
+| +bool testMataMvidiaOperatorLogic() {
+| +    // Create initial Matrix frames
+| +    Matrix frame1(2,2), frame2(2,2);
+| +    frame1(0,0) = 1; frame1(0,1) = 2; frame1(1,0) = 3; frame1(1,1) = 4;
+| +    frame2(0,0) = 5; frame2(0,1) = 6; frame2(1,0) = 7; frame2(1,1) = 8;
+| +
+| +    // Create initial MataMvidia objects
+| +    Matrix frames[] = {frame1, frame2};
+| +    MataMvidia movie1("First Movie", "Author A", frames, 2);
+| +
+| +    // Test indexing operator
+| +    ASSERT_TEST(movie1[0] == frame1);
+| +    ASSERT_TEST(movie1[1] == frame2);
+| +
+| +    // Test addition of a single frame
+| +    movie1 += frame1;
+| +    ASSERT_TEST(movie1[2] == frame1);  // Implicitly tests that length increased
+| +
+| +    // Test addition of another MataMvidia object
+| +    MataMvidia movie2("Second Movie", "Author B", frames, 2);
+| +    MataMvidia combinedMovie = movie1 + movie2;
+| +    ASSERT_TEST(combinedMovie[4] == frame2);  // Checks last frame to infer total length
+| +
+| +    // Additional tests for logical operations using indexing and result checking
+| +    for (int i = 0; i < 10; ++i) {
+| +        movie1 += frame2;  // Adding frames and checking the last added
+| +        ASSERT_TEST(movie1[i + 3] == frame2);  // i+3 to account for initial frames and first addition
+| +    }
+| +
+| +    return true;
+| +}
+| +
+| +
+| +bool testMataMvidiaCopyAndAssignment() {
+| +    // Create Matrix frames
+| +    Matrix frame1(2,2), frame2(2,2);
+| +    frame1(0,0) = 1; frame1(0,1) = 2; frame1(1,0) = 3; frame1(1,1) = 4;
+| +    frame2(0,0) = 5; frame2(0,1) = 6; frame2(1,0) = 7; frame2(1,1) = 8;
+| +
+| +    // Initial MataMvidia object
+| +    Matrix frames[] = {frame1, frame2};
+| +    MataMvidia original("Original", "Author", frames, 2);
+| +
+| +    // Copy constructor test
+| +    MataMvidia copyConstructed(original);
+| +    ASSERT_TEST(copyConstructed[0] == original[0]);
+| +    ASSERT_TEST(copyConstructed[1] == original[1]);
+| +
+| +    // Assignment operator test
+| +    MataMvidia assigned = original;
+| +    assigned = original;
+| +    ASSERT_TEST(assigned[0] == original[0]);
+| +    ASSERT_TEST(assigned[1] == original[1]);
+| +
+| +    // Modify original and ensure copies are unaffected
+| +    original[0](0,0) = 10;
+| +    ASSERT_TEST(copyConstructed[0](0,0) == 1);
+| +    ASSERT_TEST(assigned[0](0,0) == 1);
+| +
+| +    // Test self-assignment
+| +    original = original;
+| +    ASSERT_TEST(original[0](0,0) == 10);
+| +
+| +    // Additional deep copy tests
+| +    for (int i = 0; i < 10; ++i) {
+| +        MataMvidia newCopy = original;
+| +        original[i % 2](0,0) += 5;
+| +        ASSERT_TEST(newCopy[i % 2](0,0) != original[i % 2](0,0));
+| +    }
+| +
+| +    return true;
+| +}
+| +
+| +void runAllTests() {
+| +    ASSERT_TEST(testMatrixInitializationAndOperations());
+| +    ASSERT_TEST(testMataMvidiaOperations());
+| +    ASSERT_TEST(testMatrixTransformations());
+| +    ASSERT_TEST(testNonSquareMatrixTransformations());
+| +    ASSERT_TEST(testConstructorDeepCopy());
+| +    ASSERT_TEST(testMataMvidiaOperatorLogic());
+| +    ASSERT_TEST(testMataMvidiaCopyAndAssignment());
+| +}
+| +
+| 
+* commit be6de9cc83220626cfe9116b152dc2da0b491fe5
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Wed Jul 17 14:10:20 2024 +0300
+| 
+|     [Bug Fix] And code Improvements
+| 
+| diff --git a/wet/MataMvidia.cpp b/wet/MataMvidia.cpp
+| index 684519a..abf4374 100644
+| --- a/wet/MataMvidia.cpp
+| +++ b/wet/MataMvidia.cpp
+| @@ -1,19 +1,24 @@
+|  
+|  #include "MataMvidia.h"
+|  
+| +
+|  //****************************************************************************//
+|  
+| -MataMvidia::MataMvidia(std::string  str1,
+| -                       std::string  str2,
+| -                       const Matrix* array, const int n) :
+| -    movieName(std::move(str1)),
+| -    author(std::move(str2)),
+| -    frames(new Matrix[n]),
+| -    length(n),
+| -    maxSize(n)
+| -{
+| -    for (int i = 0; i < n; i++) {
+| -        frames[i] = array[i];
+| +//Not on class demands
+| +//MataMvidia::MataMvidia() : frames(nullptr), length(0), maxSize(0) {}
+| +
+| +//****************************************************************************//
+| +
+| +MataMvidia::MataMvidia(std::string  movieName,
+| +                       std::string  author,
+| +                       const Matrix* matrix, const int length) :
+| +    movieName(std::move(movieName)),
+| +    author(std::move(author)),
+| +    frames(new Matrix[length]),
+| +    length(length),
+| +    maxSize(length) {
+| +    for (int i = 0; i < length; i++) {
+| +        frames[i] = matrix[i];
+|      }
+|  }
+|  
+| @@ -24,8 +29,7 @@ MataMvidia::MataMvidia(const MataMvidia& movie) :
+|      author(movie.author),
+|      frames(new Matrix[movie.maxSize]),
+|      length(movie.length),
+| -    maxSize(movie.maxSize)
+| -{
+| +    maxSize(movie.maxSize) {
+|      for (int i = 0; i < length; i++) {
+|          frames[i] = movie.frames[i];
+|      }
+| @@ -33,15 +37,13 @@ MataMvidia::MataMvidia(const MataMvidia& movie) :
+|  
+|  //****************************************************************************//
+|  
+| -MataMvidia::~MataMvidia()
+| -{
+| +MataMvidia::~MataMvidia() {
+|      delete[] frames;
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -std::ostream& operator<<(std::ostream& os, const MataMvidia& movie)
+| -{
+| +std::ostream& operator<<(std::ostream& os, const MataMvidia& movie) {
+|      os << "Movie Name: " << movie.movieName << std::endl;
+|      os << "Author: " << movie.author << std::endl;
+|      for (int i = 0; i < movie.length; i++) {
+| @@ -54,14 +56,16 @@ std::ostream& operator<<(std::ostream& os, const MataMvidia& movie)
+|  
+|  //****************************************************************************//
+|  
+| -MataMvidia& MataMvidia::operator=(const MataMvidia& movie)
+| -{
+| -    if (this != &movie) {
+| +MataMvidia& MataMvidia::operator=(const MataMvidia& movie) {
+| +    if (this != &movie) { //&& *this != movie), but no ==,!=  demand for class
+|          movieName = movie.movieName;
+|          author = movie.author;
+| -        delete[] frames;
+| -        frames = new Matrix[movie.maxSize];
+| -        length = movie.length;
+| +        if (length != movie.length || maxSize != movie.maxSize) {
+| +            delete[] frames;
+| +            frames = new Matrix[movie.maxSize];
+| +            length = movie.length;
+| +            maxSize = movie.maxSize;
+| +        }
+|          for (int i = 0; i < length; i++) {
+|              frames[i] = movie.frames[i];
+|          }
+| @@ -71,15 +75,10 @@ MataMvidia& MataMvidia::operator=(const MataMvidia& movie)
+|  
+|  //****************************************************************************//
+|  
+| -MataMvidia& MataMvidia::operator+=(const Matrix& matrix)
+| -{
+| +MataMvidia& MataMvidia::operator+=(const Matrix& matrix) {
+|      if (maxSize <= length) {
+| -        auto* temp = new Matrix[length];
+| -        for (int i = 0; i < length; i++) {
+| -            temp[i] = frames[i];
+| -        }
+| -        delete[] frames;
+| -        maxSize = EXPAND_RATE * length;
+| +        const Matrix* temp = frames;
+| +        maxSize = EXPAND_RATE * (length ? length : DEFAULT_EXPAND_BASE);
+|          frames = new Matrix[maxSize];
+|          for (int i = 0; i < length; i++) {
+|              frames[i] = temp[i];
+| @@ -93,8 +92,7 @@ MataMvidia& MataMvidia::operator+=(const Matrix& matrix)
+|  
+|  //****************************************************************************//
+|  
+| -MataMvidia& MataMvidia::operator+=(const MataMvidia& movie)
+| -{
+| +MataMvidia& MataMvidia::operator+=(const MataMvidia& movie) {
+|      for (int i = 0; i < movie.length; i++) {
+|          *this += movie.frames[i];
+|      }
+| @@ -103,16 +101,14 @@ MataMvidia& MataMvidia::operator+=(const MataMvidia& movie)
+|  
+|  //****************************************************************************//
+|  
+| -MataMvidia operator+(const MataMvidia& a, const MataMvidia& b)
+| -{
+| -    MataMvidia result(a);
+| -    return result += b;
+| +MataMvidia operator+(const MataMvidia& movie1, const MataMvidia& movie2) {
+| +    MataMvidia result(movie1);
+| +    return result += movie2;
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -Matrix& MataMvidia::operator[](const int index)
+| -{
+| +Matrix& MataMvidia::operator[](const int index) {
+|      if (index < 0 || index >= length) {
+|          exitWithError(MatamErrorType::OutOfBounds);
+|      }
+| @@ -121,9 +117,8 @@ Matrix& MataMvidia::operator[](const int index)
+|  
+|  //****************************************************************************//
+|  
+| -const Matrix& MataMvidia::operator[](const int index) const
+| -{
+| -    if (index < 1 || index >= length) {
+| +const Matrix& MataMvidia::operator[](const int index) const {
+| +    if (index < 0 || index >= length) {
+|          exitWithError(MatamErrorType::OutOfBounds);
+|      }
+|      return frames[index];
+| diff --git a/wet/MataMvidia.h b/wet/MataMvidia.h
+| index 37b2dc4..c7e2725 100644
+| --- a/wet/MataMvidia.h
+| +++ b/wet/MataMvidia.h
+| @@ -13,10 +13,12 @@ class MataMvidia {
+|      int length;
+|      int maxSize;
+|      static const int EXPAND_RATE = 2;
+| +    static const int DEFAULT_EXPAND_BASE = 10;
+|  
+|  public:
+|  
+| -    MataMvidia(std::string, std::string, const Matrix[], int);
+| +    //MataMvidia(); //Not in class Demands
+| +    MataMvidia(std::string, std::string, const Matrix*, int);
+|      MataMvidia(const MataMvidia&);
+|      ~MataMvidia();
+|  
+| @@ -27,8 +29,6 @@ public:
+|      MataMvidia& operator+=(const MataMvidia&);
+|      Matrix& operator[](int);
+|      const Matrix& operator[](int) const;
+| -
+| -
+|  };
+|  
+|  MataMvidia operator+(const MataMvidia&, const MataMvidia&);
+| \ No newline at end of file
+| diff --git a/wet/Matrix.cpp b/wet/Matrix.cpp
+| index 12e9507..897510b 100644
+| --- a/wet/Matrix.cpp
+| +++ b/wet/Matrix.cpp
+| @@ -4,62 +4,73 @@
+|  //****************************************************************************//
+|  
+|  Matrix::Matrix() :
+| -    rows(0) , cols(0), pixles(nullptr)
+| -{}
+| +    rows(0) , cols(0), pixles(nullptr) {}
+|  
+|  //****************************************************************************//
+|  
+| -Matrix::Matrix(const int n, const int m = 1) :
+| -    rows(n), cols(m), pixles(new int[n*m])
+| -{
+| -    for (int i = 0; i < n*m; i++)
+| -        pixles[i] = 0;
+| -}
+| +Matrix::Matrix(const int n, const int m) :
+| +    rows(n), cols(m), pixles(new int[n * m]()) {}
+|  
+|  //****************************************************************************//
+|  
+|  Matrix::Matrix(const Matrix& matrix) :
+|      rows(matrix.rows), cols(matrix.cols),
+| -    pixles(new int[matrix.rows * matrix.cols])
+| -{
+| -    for (int i = 0; i < rows * cols; i++)
+| +    pixles(new int[matrix.rows * matrix.cols]) {
+| +    for (int i = 0; i < rows * cols; i++) {
+|          pixles[i] = matrix.pixles[i];
+| +    }
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -Matrix::~Matrix()
+| -{
+| +Matrix::~Matrix() {
+|      delete[] pixles;
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -bool operator==(const Matrix& a, const Matrix& b)
+| -{
+| -    if (a.rows != b.rows || a.cols != b.cols) {
+| +int& Matrix::operator()(const int row, const int col) {
+| +    if (row >= rows || row < 0 || col >= cols || col < 0) {
+| +        exitWithError(MatamErrorType::OutOfBounds);
+| +    }
+| +    return pixles[row * cols + col];
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +const int& Matrix::operator()(const int row, const int col) const {
+| +    if (row >= rows || row < 0 || col >= cols || col < 0) {
+| +        exitWithError(MatamErrorType::OutOfBounds);
+| +    }
+| +    return pixles[row * cols + col];
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +bool operator==(const Matrix& m1, const Matrix& m2) {
+| +    if (m1.rows != m2.rows || m1.cols != m2.cols) {
+|          return false;
+|      }
+| -    for (int i = 0; i < a.rows * a.cols; i++) {
+| -        if (a.pixles[i] != b.pixles[i]) return false;
+| +    for (int i = 0; i < m1.rows * m1.cols; i++) {
+| +        if (m1.pixles[i] != m2.pixles[i]) {
+| +            return false;
+| +        }
+|      }
+|      return true;
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -bool operator!=(const Matrix& a, const Matrix& b)
+| -{
+| -    return !(a == b);
+| +bool operator!=(const Matrix& m1, const Matrix& m2) {
+| +    return !(m1 == m2);
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -std::ostream& operator<<(std::ostream& os, const Matrix& matrix)
+| -{
+| +std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {
+|      for (int i = 0; i < matrix.rows; i++) {
+|          for (int j = 0; j < matrix.cols; j++) {
+| -            os << "|" << matrix.pixles[i * matrix.cols + j];
+| +            os << "|" << matrix(i, j);
+|          }
+|          os << "|" << std::endl;
+|      }
+| @@ -68,9 +79,8 @@ std::ostream& operator<<(std::ostream& os, const Matrix& matrix)
+|  
+|  //****************************************************************************//
+|  
+| -Matrix& Matrix::operator=(const Matrix& matrix)
+| -{
+| -    if (this != &matrix) {
+| +Matrix& Matrix::operator=(const Matrix& matrix) {
+| +    if (this != &matrix && *this != matrix) {
+|          if (rows != matrix.rows || cols != matrix.cols) {
+|              rows = matrix.rows;
+|              cols = matrix.cols;
+| @@ -86,8 +96,7 @@ Matrix& Matrix::operator=(const Matrix& matrix)
+|  
+|  //****************************************************************************//
+|  
+| -Matrix& Matrix::operator+=(const Matrix& matrix)
+| -{
+| +Matrix& Matrix::operator+=(const Matrix& matrix) {
+|      if (rows != matrix.rows && cols != matrix.cols) {
+|          exitWithError(MatamErrorType::UnmatchedSizes);
+|      }
+| @@ -99,16 +108,14 @@ Matrix& Matrix::operator+=(const Matrix& matrix)
+|  
+|  //****************************************************************************//
+|  
+| -Matrix operator+(const Matrix& a, const Matrix& b)
+| -{
+| -    Matrix result(a);
+| -    return result += b;
+| +Matrix operator+(const Matrix& m1, const Matrix& m2) {
+| +    Matrix result(m1);
+| +    return result += m2;
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -Matrix& Matrix::operator*=(const int scalar)
+| -{
+| +Matrix& Matrix::operator*=(const int scalar) {
+|      if (scalar != 1) {
+|          for (int i = 0; i < rows * cols; i++) {
+|              pixles[i] *= scalar;
+| @@ -119,32 +126,28 @@ Matrix& Matrix::operator*=(const int scalar)
+|  
+|  //****************************************************************************//
+|  
+| -Matrix operator*(const int scalar, const Matrix& matrix)
+| -{
+| +Matrix operator*(const int scalar, const Matrix& matrix) {
+|      Matrix result(matrix);
+|      return result *= scalar;
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -Matrix operator*(const Matrix& matrix, const int scalar)
+| -{
+| +Matrix operator*(const Matrix& matrix, const int scalar) {
+|      return scalar * matrix;
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -Matrix& Matrix::operator*=(const Matrix& matrix)
+| -{
+| -    if (rows != matrix.cols || cols != matrix.rows) {
+| +Matrix& Matrix::operator*=(const Matrix& matrix) {
+| +    if (cols != matrix.rows) {
+|          exitWithError(MatamErrorType::UnmatchedSizes);
+|      }
+|      Matrix result(rows, matrix.cols);
+|      for (int i = 0; i < rows; i++) {
+|          for (int j = 0; j < matrix.cols; j++) {
+|              for (int k = 0; k < cols; k++) {
+| -                result.pixles[i * matrix.cols + j] +=
+| -                    pixles[i * cols + k] * matrix.pixles[k * matrix.cols + j];
+| +                result(i, j) += (*this)(i, k) * matrix(k, j);
+|              }
+|          }
+|      }
+| @@ -154,10 +157,9 @@ Matrix& Matrix::operator*=(const Matrix& matrix)
+|  
+|  //****************************************************************************//
+|  
+| -Matrix operator*(const Matrix& a, const Matrix& b)
+| -{
+| -    Matrix result(a);
+| -    return result *= b;
+| +Matrix operator*(const Matrix& m1, const Matrix& m2) {
+| +    Matrix result(m1);
+| +    return result *= m2;
+|  }
+|  
+|  //****************************************************************************//
+| @@ -168,45 +170,22 @@ Matrix Matrix::operator-() const {
+|  
+|  //****************************************************************************//
+|  
+| -Matrix& Matrix::operator-=(const Matrix& matrix)
+| -{
+| +Matrix& Matrix::operator-=(const Matrix& matrix) {
+|      return *this += -matrix;
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -Matrix operator-(const Matrix& a, const Matrix& b)
+| -{
+| -    return a + -1*b;
+| +Matrix operator-(const Matrix& m1, const Matrix& m2) {
+| +    return m1 + -m2;
+|  }
+|  
+|  //****************************************************************************//
+|  
+| -int& Matrix::operator()(const int n, const int m)
+| -{
+| -    if (n >= rows || n < 0 || m >= cols || m < 0) {
+| -        exitWithError(MatamErrorType::OutOfBounds);
+| -    }
+| -    return pixles[n * cols + m];
+| -}
+| -
+| -//****************************************************************************//
+| -
+| -const int& Matrix::operator()(const int n, const int m) const
+| -{
+| -    if (n >= rows || n < 0 || m >= cols || m < 0) {
+| -        exitWithError(MatamErrorType::OutOfBounds);
+| -    }
+| -    return pixles[n * cols + m];
+| -}
+| -
+| -//****************************************************************************//
+| -
+| -Matrix Matrix::rotateClockwise()
+| -{
+| +Matrix Matrix::rotateClockwise() {
+|      Matrix result(cols, rows);
+| -    for (int i = 0; i < cols; i++) {
+| -        for (int j = 0; j < rows; j++) {
+| +    for (int i = 0; i < rows; i++) {
+| +        for (int j = 0; j < cols; j++) {
+|              result(j, rows - i - 1) = (*this)(i, j);
+|          }
+|      }
+| @@ -215,11 +194,10 @@ Matrix Matrix::rotateClockwise()
+|  
+|  //****************************************************************************//
+|  
+| -Matrix Matrix::rotateCounterClockwise()
+| -{
+| +Matrix Matrix::rotateCounterClockwise() {
+|      Matrix result(cols, rows);
+| -    for (int i = 0; i < cols; i++) {
+| -        for (int j = 0; j < rows; j++) {
+| +    for (int i = 0; i < rows; i++) {
+| +        for (int j = 0; j < cols; j++) {
+|              result(cols - j - 1, i) = (*this)(i, j);
+|          }
+|      }
+| @@ -228,12 +206,11 @@ Matrix Matrix::rotateCounterClockwise()
+|  
+|  //****************************************************************************//
+|  
+| -Matrix Matrix::transpose()
+| -{
+| +Matrix Matrix::transpose() {
+|      Matrix result(cols, rows);
+| -    for (int i = 0; i < cols; i++) {
+| -        for (int j = 0; j < rows; j++) {
+| -            result(j, i) = (*this)(i, j);
+| +    for (int i = 0; i < rows; i++) {
+| +        for (int j = 0; j < cols; j++) {
+| +            result(j,i) = (*this)(i, j);
+|          }
+|      }
+|      return result;
+| diff --git a/wet/Matrix.h b/wet/Matrix.h
+| index 72bee11..e3cff2c 100644
+| --- a/wet/Matrix.h
+| +++ b/wet/Matrix.h
+| @@ -16,6 +16,9 @@ public:
+|      Matrix(const Matrix&);
+|      ~Matrix();
+|  
+| +    int& operator()(int, int);
+| +    const int& operator()(int, int) const;
+| +
+|      friend bool operator==(const Matrix&, const Matrix&);
+|      friend std::ostream& operator<<(std::ostream&, const Matrix&);
+|  
+| @@ -25,8 +28,6 @@ public:
+|      Matrix& operator*=(const Matrix&);
+|      Matrix operator-() const;
+|      Matrix& operator-=(const Matrix&);
+| -    int& operator()(int, int);
+| -    const int& operator()(int, int) const;
+|  
+|      Matrix rotateClockwise();
+|      Matrix rotateCounterClockwise();
+| 
+* commit b12c3079c9209c9d4507566a1c755da326b4ebd9
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Tue Jul 16 19:19:54 2024 +0300
+| 
+|     dry part
+| 
+| diff --git a/dry/dry.pdf b/dry/dry.pdf
+| new file mode 100644
+| index 0000000..b24eb7e
+| Binary files /dev/null and b/dry/dry.pdf differ
+| diff --git a/dry/log.txt b/dry/log.txt
+| new file mode 100644
+| index 0000000..5526991
+| --- /dev/null
+| +++ b/dry/log.txt
+| @@ -0,0 +1,1435 @@
+| +* commit b2b47a97a554f2817497f9af3c04686cbd9fa28e
+| +| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| +| Date:   Tue Jul 16 19:12:28 2024 +0300
+| +| 
+| +|     [Update] Minor code improvements
+| +| 
+| +| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| +| index a04a7b7..d0618f3 100644
+| +| --- a/dry/Pirate.cpp
+| +| +++ b/dry/Pirate.cpp
+| +| @@ -2,7 +2,7 @@
+| +|  #include "Pirate.h"
+| +|  
+| +|  
+| +| -Pirate::Pirate() : bounty(0), ownedDevilFruit(Secret_fruit) {}
+| +| +Pirate::Pirate() : bounty(0), ownedDevilFruit(SECRET_FRUIT) {}
+| +|  
+| +|  
+| +|  Pirate::Pirate(const string& name,
+| +| @@ -16,7 +16,7 @@ void Pirate::setName(const string& name){
+| +|  }
+| +|  
+| +|  
+| +| -std::string Pirate::getName(){
+| +| +std::string Pirate::getName() const {
+| +|      return name;
+| +|  }
+| +|  
+| +| @@ -36,11 +36,11 @@ void Pirate::setDevilFruit(const DEVIL_FRUIT devilFruit) {
+| +|  
+| +|  
+| +|  std::string Pirate::getDevilFruit() const {
+| +| -    if (ownedDevilFruit == Paramecia)
+| +| +    if (ownedDevilFruit == PARAMECIA)
+| +|          return "Paramecia";
+| +| -    if (ownedDevilFruit == Zoan)
+| +| +    if (ownedDevilFruit == ZOAN)
+| +|          return "Zoan";
+| +| -    return "secret_fruit";
+| +| +    return "Secret Fruit";
+| +|  }
+| +|  
+| +|  
+| +| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| +| index e0cda4e..5358e29 100644
+| +| --- a/dry/Pirate.h
+| +| +++ b/dry/Pirate.h
+| +| @@ -6,10 +6,10 @@
+| +|  using std::string;
+| +|  
+| +|  enum DEVIL_FRUIT {
+| +| -    Paramecia,
+| +| -    Zoan,
+| +| -    Logia,
+| +| -    Secret_fruit
+| +| +    PARAMECIA,
+| +| +    ZOAN,
+| +| +    LOGIA,
+| +| +    SECRET_FRUIT
+| +|  };
+| +|  
+| +|  class Pirate {
+| +| @@ -25,7 +25,7 @@ public:
+| +|      ~Pirate() = default;
+| +|  
+| +|      void setName(const string& name);
+| +| -    string getName();
+| +| +    string getName() const;
+| +|  
+| +|      void setBounty(int bounty);
+| +|      int getBounty() const;
+| +| diff --git a/dry/main.cpp b/dry/main.cpp
+| +| index 77d2e11..6514398 100644
+| +| --- a/dry/main.cpp
+| +| +++ b/dry/main.cpp
+| +| @@ -7,8 +7,8 @@ using std::cout, std::endl;
+| +|  
+| +|  int main() {
+| +|  
+| +| -    Pirate luffy("Luffy", 1000000, Paramecia);
+| +| -    Pirate zoro("Zoro", 500000, Zoan);
+| +| +    Pirate luffy("Luffy", 1000000, PARAMECIA);
+| +| +    Pirate zoro("Zoro", 500000, ZOAN);
+| +|  
+| +|      const int crewSize = 2;
+| +|      
+| +| 
+| +* commit 9c4b35e1c83c84bde57d6f7908712d3414600ae1
+| +| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| +| Date:   Tue Jul 16 16:56:55 2024 +0300
+| +| 
+| +|     [Fixed Bug] in c'tor
+| +| 
+| +| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| +| index 8425fb4..a04a7b7 100644
+| +| --- a/dry/Pirate.cpp
+| +| +++ b/dry/Pirate.cpp
+| +| @@ -2,7 +2,7 @@
+| +|  #include "Pirate.h"
+| +|  
+| +|  
+| +| -Pirate::Pirate() : bounty(0), ownedDevilFruit(secret_fruit) {}
+| +| +Pirate::Pirate() : bounty(0), ownedDevilFruit(Secret_fruit) {}
+| +|  
+| +|  
+| +|  Pirate::Pirate(const string& name,
+| +|   
+| +*   commit a03c64408ce9ff25cf3a7f2771b3b70c2b20ae1f
+| +|\  Merge: b62b14f 2f70da0
+| +| | Author: elhannanc <elhannanc@campus.technion.ac.il>
+| +| | Date:   Tue Jul 16 16:50:31 2024 +0300
+| +| | 
+| +| |     Merge branch 'devil_fruit'
+| +| | 
+| +| * commit 2f70da02b2e1e33d81d55d61b1e249baf4138927
+| +| | Author: elhannanc <elhannanc@campus.technion.ac.il>
+| +| | Date:   Tue Jul 16 16:39:05 2024 +0300
+| +| | 
+| +| |     [Update] Added Devil Fruit Special Names
+| +| | 
+| +| | diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| +| | index 83483a3..8425fb4 100644
+| +| | --- a/dry/Pirate.cpp
+| +| | +++ b/dry/Pirate.cpp
+| +| | @@ -36,10 +36,10 @@ void Pirate::setDevilFruit(const DEVIL_FRUIT devilFruit) {
+| +| |  
+| +| |  
+| +| |  std::string Pirate::getDevilFruit() const {
+| +| | -    if (ownedDevilFruit == fruit_1)
+| +| | -        return "fruit_1";
+| +| | -    if (ownedDevilFruit == fruit_2)
+| +| | -        return "fruit_2";
+| +| | +    if (ownedDevilFruit == Paramecia)
+| +| | +        return "Paramecia";
+| +| | +    if (ownedDevilFruit == Zoan)
+| +| | +        return "Zoan";
+| +| |      return "secret_fruit";
+| +| |  }
+| +| |  
+| +| | diff --git a/dry/Pirate.h b/dry/Pirate.h
+| +| | index b2a31f6..fb3c2f3 100644
+| +| | --- a/dry/Pirate.h
+| +| | +++ b/dry/Pirate.h
+| +| | @@ -6,8 +6,8 @@
+| +| |  using std::string;
+| +| |  
+| +| |  enum DEVIL_FRUIT {
+| +| | -    fruit_1,
+| +| | -    fruit_2,
+| +| | +    Paramecia,
+| +| | +    Zoan,
+| +| |      secret_fruit
+| +| |  };
+| +| |  
+| +| | diff --git a/dry/main.cpp b/dry/main.cpp
+| +| | index 25b72c6..77d2e11 100644
+| +| | --- a/dry/main.cpp
+| +| | +++ b/dry/main.cpp
+| +| | @@ -7,8 +7,8 @@ using std::cout, std::endl;
+| +| |  
+| +| |  int main() {
+| +| |  
+| +| | -    Pirate luffy("Luffy", 1000000, fruit_1);
+| +| | -    Pirate zoro("Zoro", 500000, fruit_2);
+| +| | +    Pirate luffy("Luffy", 1000000, Paramecia);
+| +| | +    Pirate zoro("Zoro", 500000, Zoan);
+| +| |  
+| +| |      const int crewSize = 2;
+| +| |      
+| +| | 
+| +* | commit b62b14f60e55beaea3aba0608b44641feb70511e
+| +|/  Author: elhannanc <elhannanc@campus.technion.ac.il>
+| +|   Date:   Tue Jul 16 16:42:47 2024 +0300
+| +|   
+| +|       [Update] Added Devil Fruit Logia
+| +|   
+| +|   diff --git a/dry/Pirate.h b/dry/Pirate.h
+| +|   index b2a31f6..7f3d514 100644
+| +|   --- a/dry/Pirate.h
+| +|   +++ b/dry/Pirate.h
+| +|   @@ -8,6 +8,7 @@ using std::string;
+| +|    enum DEVIL_FRUIT {
+| +|        fruit_1,
+| +|        fruit_2,
+| +|   +    Logia,
+| +|        secret_fruit
+| +|    };
+| +|    
+| +| 
+| +* commit cba92732f26ad32fd3d64869410b2232b053170c
+| +| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| +| Date:   Tue Jul 16 16:25:54 2024 +0300
+| +| 
+| +|     [Update] Minor Code Improvments
+| +| 
+| +| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| +| index 4632278..83483a3 100644
+| +| --- a/dry/Pirate.cpp
+| +| +++ b/dry/Pirate.cpp
+| +| @@ -2,7 +2,7 @@
+| +|  #include "Pirate.h"
+| +|  
+| +|  
+| +| -Pirate::Pirate() : bounty(0) {}
+| +| +Pirate::Pirate() : bounty(0), ownedDevilFruit(secret_fruit) {}
+| +|  
+| +|  
+| +|  Pirate::Pirate(const string& name,
+| +| @@ -40,13 +40,11 @@ std::string Pirate::getDevilFruit() const {
+| +|          return "fruit_1";
+| +|      if (ownedDevilFruit == fruit_2)
+| +|          return "fruit_2";
+| +| -    if (ownedDevilFruit == fruit_3)
+| +| -        return "fruit_3";
+| +|      return "secret_fruit";
+| +|  }
+| +|  
+| +|  
+| +| -std::ostream &operator<<(std::ostream &os, const Pirate &pirate){
+| +| +std::ostream &operator<<(std::ostream &os, const Pirate &pirate) {
+| +|      os << "Pirate " << pirate.name << ":"<< std::endl;
+| +|      os << "Head Bounty: " << pirate.bounty << std::endl;
+| +|      os << "Owned Devil-Fruit: " << pirate.getDevilFruit();
+| +| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| +| index 99c1e50..b2a31f6 100644
+| +| --- a/dry/Pirate.h
+| +| +++ b/dry/Pirate.h
+| +| @@ -8,7 +8,6 @@ using std::string;
+| +|  enum DEVIL_FRUIT {
+| +|      fruit_1,
+| +|      fruit_2,
+| +| -    fruit_3,
+| +|      secret_fruit
+| +|  };
+| +|  
+| +| 
+| +* commit 8606d66050309d72a4b33efed0fd7c439f02017c
+| +| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| +| Date:   Tue Jul 16 00:22:50 2024 +0300
+| +| 
+| +|     [Added Feature] New field DEVIL_FRUIT + methods
+| +| 
+| +| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| +| index 4b34d5f..4632278 100644
+| +| --- a/dry/Pirate.cpp
+| +| +++ b/dry/Pirate.cpp
+| +| @@ -5,8 +5,10 @@
+| +|  Pirate::Pirate() : bounty(0) {}
+| +|  
+| +|  
+| +| -Pirate::Pirate(const string& name, const int bounty):
+| +| -    name(name), bounty(bounty) {}
+| +| +Pirate::Pirate(const string& name,
+| +| +    const int bounty,
+| +| +    const DEVIL_FRUIT devilFruit):
+| +| +    name(name), bounty(bounty), ownedDevilFruit(devilFruit) {}
+| +|  
+| +|  
+| +|  void Pirate::setName(const string& name){
+| +| @@ -28,10 +30,26 @@ int Pirate::getBounty() const {
+| +|      return bounty;
+| +|  }
+| +|  
+| +| +void Pirate::setDevilFruit(const DEVIL_FRUIT devilFruit) {
+| +| +    this->ownedDevilFruit = devilFruit;
+| +| +}
+| +| +
+| +| +
+| +| +std::string Pirate::getDevilFruit() const {
+| +| +    if (ownedDevilFruit == fruit_1)
+| +| +        return "fruit_1";
+| +| +    if (ownedDevilFruit == fruit_2)
+| +| +        return "fruit_2";
+| +| +    if (ownedDevilFruit == fruit_3)
+| +| +        return "fruit_3";
+| +| +    return "secret_fruit";
+| +| +}
+| +| +
+| +|  
+| +|  std::ostream &operator<<(std::ostream &os, const Pirate &pirate){
+| +| -    os << "Pirate: " << pirate.name << std::endl;
+| +| -    os << "Bounty: " << pirate.bounty;
+| +| +    os << "Pirate " << pirate.name << ":"<< std::endl;
+| +| +    os << "Head Bounty: " << pirate.bounty << std::endl;
+| +| +    os << "Owned Devil-Fruit: " << pirate.getDevilFruit();
+| +|      return os;
+| +|  }
+| +|  
+| +| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| +| index 35fcd58..99c1e50 100644
+| +| --- a/dry/Pirate.h
+| +| +++ b/dry/Pirate.h
+| +| @@ -5,15 +5,23 @@
+| +|  
+| +|  using std::string;
+| +|  
+| +| +enum DEVIL_FRUIT {
+| +| +    fruit_1,
+| +| +    fruit_2,
+| +| +    fruit_3,
+| +| +    secret_fruit
+| +| +};
+| +| +
+| +|  class Pirate {
+| +|  
+| +|      string name;
+| +|      int bounty;
+| +| +    DEVIL_FRUIT ownedDevilFruit;
+| +|  
+| +|  public:
+| +|  
+| +|      Pirate();
+| +| -    Pirate(const string& name, int bounty);
+| +| +    Pirate(const string& name, int bounty, DEVIL_FRUIT devilFruit);
+| +|      ~Pirate() = default;
+| +|  
+| +|      void setName(const string& name);
+| +| @@ -22,5 +30,8 @@ public:
+| +|      void setBounty(int bounty);
+| +|      int getBounty() const;
+| +|  
+| +| +    void setDevilFruit(DEVIL_FRUIT devilFruit);
+| +| +    string getDevilFruit() const;
+| +| +
+| +|      friend std::ostream &operator<<(std::ostream &os, const Pirate &pirate);
+| +|  };
+| +| diff --git a/dry/main.cpp b/dry/main.cpp
+| +| index 56c480c..25b72c6 100644
+| +| --- a/dry/main.cpp
+| +| +++ b/dry/main.cpp
+| +| @@ -7,8 +7,8 @@ using std::cout, std::endl;
+| +|  
+| +|  int main() {
+| +|  
+| +| -    Pirate luffy("Luffy", 1000000);
+| +| -    Pirate zoro("Zoro", 500000);
+| +| +    Pirate luffy("Luffy", 1000000, fruit_1);
+| +| +    Pirate zoro("Zoro", 500000, fruit_2);
+| +|  
+| +|      const int crewSize = 2;
+| +|      
+| +| 
+| +* commit 77f66d113e19e3492b3ecd01b0f63521f9e30e14
+| +| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| +| Date:   Mon Jul 15 23:33:07 2024 +0300
+| +| 
+| +|     [Added Features] New Field bounty + methods
+| +| 
+| +| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| +| index c96892e..4b34d5f 100644
+| +| --- a/dry/Pirate.cpp
+| +| +++ b/dry/Pirate.cpp
+| +| @@ -2,7 +2,11 @@
+| +|  #include "Pirate.h"
+| +|  
+| +|  
+| +| -Pirate::Pirate(const string& name): name(name) {}
+| +| +Pirate::Pirate() : bounty(0) {}
+| +| +
+| +| +
+| +| +Pirate::Pirate(const string& name, const int bounty):
+| +| +    name(name), bounty(bounty) {}
+| +|  
+| +|  
+| +|  void Pirate::setName(const string& name){
+| +| @@ -15,7 +19,19 @@ std::string Pirate::getName(){
+| +|  }
+| +|  
+| +|  
+| +| +void Pirate::setBounty(const int bounty) {
+| +| +    this->bounty = bounty;
+| +| +}
+| +| +
+| +| +
+| +| +int Pirate::getBounty() const {
+| +| +    return bounty;
+| +| +}
+| +| +
+| +| +
+| +|  std::ostream &operator<<(std::ostream &os, const Pirate &pirate){
+| +| -    os << pirate.name;
+| +| +    os << "Pirate: " << pirate.name << std::endl;
+| +| +    os << "Bounty: " << pirate.bounty;
+| +|      return os;
+| +|  }
+| +| +
+| +| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| +| index 7769667..35fcd58 100644
+| +| --- a/dry/Pirate.h
+| +| +++ b/dry/Pirate.h
+| +| @@ -6,17 +6,21 @@
+| +|  using std::string;
+| +|  
+| +|  class Pirate {
+| +| -private:
+| +| +
+| +|      string name;
+| +| +    int bounty;
+| +|  
+| +|  public:
+| +| -    Pirate(const string& name);
+| +|  
+| +| +    Pirate();
+| +| +    Pirate(const string& name, int bounty);
+| +|      ~Pirate() = default;
+| +|  
+| +|      void setName(const string& name);
+| +| -
+| +|      string getName();
+| +|  
+| +| +    void setBounty(int bounty);
+| +| +    int getBounty() const;
+| +| +
+| +|      friend std::ostream &operator<<(std::ostream &os, const Pirate &pirate);
+| +|  };
+| +| diff --git a/dry/main.cpp b/dry/main.cpp
+| +| index 6b659a1..56c480c 100644
+| +| --- a/dry/main.cpp
+| +| +++ b/dry/main.cpp
+| +| @@ -7,8 +7,8 @@ using std::cout, std::endl;
+| +|  
+| +|  int main() {
+| +|  
+| +| -    Pirate luffy("Luffy");
+| +| -    Pirate zoro("Zoro");
+| +| +    Pirate luffy("Luffy", 1000000);
+| +| +    Pirate zoro("Zoro", 500000);
+| +|  
+| +|      const int crewSize = 2;
+| +|      
+| +| 
+| +* commit 2add635f9be6dfa2d6726a435934100bf245afb9
+| +| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| +| Date:   Mon Jul 15 21:20:53 2024 +0300
+| +| 
+| +|     A working version passed tests + valgrind
+| +| 
+| +| diff --git a/wet/MataMvidia.cpp b/wet/MataMvidia.cpp
+| +| new file mode 100644
+| +| index 0000000..684519a
+| +| --- /dev/null
+| +| +++ b/wet/MataMvidia.cpp
+| +| @@ -0,0 +1,132 @@
+| +| +
+| +| +#include "MataMvidia.h"
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +MataMvidia::MataMvidia(std::string  str1,
+| +| +                       std::string  str2,
+| +| +                       const Matrix* array, const int n) :
+| +| +    movieName(std::move(str1)),
+| +| +    author(std::move(str2)),
+| +| +    frames(new Matrix[n]),
+| +| +    length(n),
+| +| +    maxSize(n)
+| +| +{
+| +| +    for (int i = 0; i < n; i++) {
+| +| +        frames[i] = array[i];
+| +| +    }
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +MataMvidia::MataMvidia(const MataMvidia& movie) :
+| +| +    movieName(movie.movieName),
+| +| +    author(movie.author),
+| +| +    frames(new Matrix[movie.maxSize]),
+| +| +    length(movie.length),
+| +| +    maxSize(movie.maxSize)
+| +| +{
+| +| +    for (int i = 0; i < length; i++) {
+| +| +        frames[i] = movie.frames[i];
+| +| +    }
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +MataMvidia::~MataMvidia()
+| +| +{
+| +| +    delete[] frames;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +std::ostream& operator<<(std::ostream& os, const MataMvidia& movie)
+| +| +{
+| +| +    os << "Movie Name: " << movie.movieName << std::endl;
+| +| +    os << "Author: " << movie.author << std::endl;
+| +| +    for (int i = 0; i < movie.length; i++) {
+| +| +        os << std::endl << "Frame " << i << ":" << std::endl;
+| +| +        os << movie.frames[i];
+| +| +    }
+| +| +    os << std::endl << "-----End of Movie-----" << std::endl;
+| +| +    return os;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +MataMvidia& MataMvidia::operator=(const MataMvidia& movie)
+| +| +{
+| +| +    if (this != &movie) {
+| +| +        movieName = movie.movieName;
+| +| +        author = movie.author;
+| +| +        delete[] frames;
+| +| +        frames = new Matrix[movie.maxSize];
+| +| +        length = movie.length;
+| +| +        for (int i = 0; i < length; i++) {
+| +| +            frames[i] = movie.frames[i];
+| +| +        }
+| +| +    }
+| +| +    return *this;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +MataMvidia& MataMvidia::operator+=(const Matrix& matrix)
+| +| +{
+| +| +    if (maxSize <= length) {
+| +| +        auto* temp = new Matrix[length];
+| +| +        for (int i = 0; i < length; i++) {
+| +| +            temp[i] = frames[i];
+| +| +        }
+| +| +        delete[] frames;
+| +| +        maxSize = EXPAND_RATE * length;
+| +| +        frames = new Matrix[maxSize];
+| +| +        for (int i = 0; i < length; i++) {
+| +| +            frames[i] = temp[i];
+| +| +        }
+| +| +        delete[] temp;
+| +| +    }
+| +| +    frames[length] = matrix;
+| +| +    length += 1;
+| +| +    return *this;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +MataMvidia& MataMvidia::operator+=(const MataMvidia& movie)
+| +| +{
+| +| +    for (int i = 0; i < movie.length; i++) {
+| +| +        *this += movie.frames[i];
+| +| +    }
+| +| +    return *this;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +MataMvidia operator+(const MataMvidia& a, const MataMvidia& b)
+| +| +{
+| +| +    MataMvidia result(a);
+| +| +    return result += b;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix& MataMvidia::operator[](const int index)
+| +| +{
+| +| +    if (index < 0 || index >= length) {
+| +| +        exitWithError(MatamErrorType::OutOfBounds);
+| +| +    }
+| +| +    return frames[index];
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +const Matrix& MataMvidia::operator[](const int index) const
+| +| +{
+| +| +    if (index < 1 || index >= length) {
+| +| +        exitWithError(MatamErrorType::OutOfBounds);
+| +| +    }
+| +| +    return frames[index];
+| +| +}
+| +| +
+| +| +
+| +| diff --git a/wet/MataMvidia.h b/wet/MataMvidia.h
+| +| new file mode 100644
+| +| index 0000000..37b2dc4
+| +| --- /dev/null
+| +| +++ b/wet/MataMvidia.h
+| +| @@ -0,0 +1,34 @@
+| +| +#pragma once
+| +| +
+| +| +#include "Matrix.h"
+| +| +#include <string>
+| +| +#include <ostream>
+| +| +
+| +| +
+| +| +class MataMvidia {
+| +| +
+| +| +    std::string movieName;
+| +| +    std::string author;
+| +| +    Matrix* frames;
+| +| +    int length;
+| +| +    int maxSize;
+| +| +    static const int EXPAND_RATE = 2;
+| +| +
+| +| +public:
+| +| +
+| +| +    MataMvidia(std::string, std::string, const Matrix[], int);
+| +| +    MataMvidia(const MataMvidia&);
+| +| +    ~MataMvidia();
+| +| +
+| +| +    friend std::ostream& operator<<(std::ostream&, const MataMvidia&);
+| +| +
+| +| +    MataMvidia& operator=(const MataMvidia&);
+| +| +    MataMvidia& operator+=(const Matrix&);
+| +| +    MataMvidia& operator+=(const MataMvidia&);
+| +| +    Matrix& operator[](int);
+| +| +    const Matrix& operator[](int) const;
+| +| +
+| +| +
+| +| +};
+| +| +
+| +| +MataMvidia operator+(const MataMvidia&, const MataMvidia&);
+| +| \ No newline at end of file
+| +| diff --git a/wet/Matrix.cpp b/wet/Matrix.cpp
+| +| new file mode 100644
+| +| index 0000000..12e9507
+| +| --- /dev/null
+| +| +++ b/wet/Matrix.cpp
+| +| @@ -0,0 +1,259 @@
+| +| +
+| +| +#include "Matrix.h"
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix::Matrix() :
+| +| +    rows(0) , cols(0), pixles(nullptr)
+| +| +{}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix::Matrix(const int n, const int m = 1) :
+| +| +    rows(n), cols(m), pixles(new int[n*m])
+| +| +{
+| +| +    for (int i = 0; i < n*m; i++)
+| +| +        pixles[i] = 0;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix::Matrix(const Matrix& matrix) :
+| +| +    rows(matrix.rows), cols(matrix.cols),
+| +| +    pixles(new int[matrix.rows * matrix.cols])
+| +| +{
+| +| +    for (int i = 0; i < rows * cols; i++)
+| +| +        pixles[i] = matrix.pixles[i];
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix::~Matrix()
+| +| +{
+| +| +    delete[] pixles;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +bool operator==(const Matrix& a, const Matrix& b)
+| +| +{
+| +| +    if (a.rows != b.rows || a.cols != b.cols) {
+| +| +        return false;
+| +| +    }
+| +| +    for (int i = 0; i < a.rows * a.cols; i++) {
+| +| +        if (a.pixles[i] != b.pixles[i]) return false;
+| +| +    }
+| +| +    return true;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +bool operator!=(const Matrix& a, const Matrix& b)
+| +| +{
+| +| +    return !(a == b);
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +std::ostream& operator<<(std::ostream& os, const Matrix& matrix)
+| +| +{
+| +| +    for (int i = 0; i < matrix.rows; i++) {
+| +| +        for (int j = 0; j < matrix.cols; j++) {
+| +| +            os << "|" << matrix.pixles[i * matrix.cols + j];
+| +| +        }
+| +| +        os << "|" << std::endl;
+| +| +    }
+| +| +    return os;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix& Matrix::operator=(const Matrix& matrix)
+| +| +{
+| +| +    if (this != &matrix) {
+| +| +        if (rows != matrix.rows || cols != matrix.cols) {
+| +| +            rows = matrix.rows;
+| +| +            cols = matrix.cols;
+| +| +            delete[] pixles;
+| +| +            pixles = new int[rows * cols];
+| +| +        }
+| +| +        for (int i = 0; i < rows * cols; i++) {
+| +| +            pixles[i] = matrix.pixles[i];
+| +| +        }
+| +| +    }
+| +| +    return *this;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix& Matrix::operator+=(const Matrix& matrix)
+| +| +{
+| +| +    if (rows != matrix.rows && cols != matrix.cols) {
+| +| +        exitWithError(MatamErrorType::UnmatchedSizes);
+| +| +    }
+| +| +    for (int i = 0; i < rows * cols; i++) {
+| +| +        pixles[i] += matrix.pixles[i];
+| +| +    }
+| +| +    return *this;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix operator+(const Matrix& a, const Matrix& b)
+| +| +{
+| +| +    Matrix result(a);
+| +| +    return result += b;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix& Matrix::operator*=(const int scalar)
+| +| +{
+| +| +    if (scalar != 1) {
+| +| +        for (int i = 0; i < rows * cols; i++) {
+| +| +            pixles[i] *= scalar;
+| +| +        }
+| +| +    }
+| +| +    return *this;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix operator*(const int scalar, const Matrix& matrix)
+| +| +{
+| +| +    Matrix result(matrix);
+| +| +    return result *= scalar;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix operator*(const Matrix& matrix, const int scalar)
+| +| +{
+| +| +    return scalar * matrix;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix& Matrix::operator*=(const Matrix& matrix)
+| +| +{
+| +| +    if (rows != matrix.cols || cols != matrix.rows) {
+| +| +        exitWithError(MatamErrorType::UnmatchedSizes);
+| +| +    }
+| +| +    Matrix result(rows, matrix.cols);
+| +| +    for (int i = 0; i < rows; i++) {
+| +| +        for (int j = 0; j < matrix.cols; j++) {
+| +| +            for (int k = 0; k < cols; k++) {
+| +| +                result.pixles[i * matrix.cols + j] +=
+| +| +                    pixles[i * cols + k] * matrix.pixles[k * matrix.cols + j];
+| +| +            }
+| +| +        }
+| +| +    }
+| +| +    *this = result;
+| +| +    return *this;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix operator*(const Matrix& a, const Matrix& b)
+| +| +{
+| +| +    Matrix result(a);
+| +| +    return result *= b;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix Matrix::operator-() const {
+| +| +    return Matrix(-1 * *this);
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix& Matrix::operator-=(const Matrix& matrix)
+| +| +{
+| +| +    return *this += -matrix;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix operator-(const Matrix& a, const Matrix& b)
+| +| +{
+| +| +    return a + -1*b;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +int& Matrix::operator()(const int n, const int m)
+| +| +{
+| +| +    if (n >= rows || n < 0 || m >= cols || m < 0) {
+| +| +        exitWithError(MatamErrorType::OutOfBounds);
+| +| +    }
+| +| +    return pixles[n * cols + m];
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +const int& Matrix::operator()(const int n, const int m) const
+| +| +{
+| +| +    if (n >= rows || n < 0 || m >= cols || m < 0) {
+| +| +        exitWithError(MatamErrorType::OutOfBounds);
+| +| +    }
+| +| +    return pixles[n * cols + m];
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix Matrix::rotateClockwise()
+| +| +{
+| +| +    Matrix result(cols, rows);
+| +| +    for (int i = 0; i < cols; i++) {
+| +| +        for (int j = 0; j < rows; j++) {
+| +| +            result(j, rows - i - 1) = (*this)(i, j);
+| +| +        }
+| +| +    }
+| +| +    return result;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix Matrix::rotateCounterClockwise()
+| +| +{
+| +| +    Matrix result(cols, rows);
+| +| +    for (int i = 0; i < cols; i++) {
+| +| +        for (int j = 0; j < rows; j++) {
+| +| +            result(cols - j - 1, i) = (*this)(i, j);
+| +| +        }
+| +| +    }
+| +| +    return result;
+| +| +}
+| +| +
+| +| +//****************************************************************************//
+| +| +
+| +| +Matrix Matrix::transpose()
+| +| +{
+| +| +    Matrix result(cols, rows);
+| +| +    for (int i = 0; i < cols; i++) {
+| +| +        for (int j = 0; j < rows; j++) {
+| +| +            result(j, i) = (*this)(i, j);
+| +| +        }
+| +| +    }
+| +| +    return result;
+| +| +}
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| diff --git a/wet/Matrix.h b/wet/Matrix.h
+| +| new file mode 100644
+| +| index 0000000..72bee11
+| +| --- /dev/null
+| +| +++ b/wet/Matrix.h
+| +| @@ -0,0 +1,46 @@
+| +| +#pragma once
+| +| +
+| +| +#include "Utilities.h"
+| +| +#include <ostream>
+| +| +
+| +| +class Matrix {
+| +| +
+| +| +    int rows;
+| +| +    int cols;
+| +| +    int* pixles;
+| +| +
+| +| +public:
+| +| +
+| +| +    Matrix();
+| +| +    Matrix(int, int);
+| +| +    Matrix(const Matrix&);
+| +| +    ~Matrix();
+| +| +
+| +| +    friend bool operator==(const Matrix&, const Matrix&);
+| +| +    friend std::ostream& operator<<(std::ostream&, const Matrix&);
+| +| +
+| +| +    Matrix& operator=(const Matrix&);
+| +| +    Matrix& operator+=(const Matrix&);
+| +| +    Matrix& operator*=(int);
+| +| +    Matrix& operator*=(const Matrix&);
+| +| +    Matrix operator-() const;
+| +| +    Matrix& operator-=(const Matrix&);
+| +| +    int& operator()(int, int);
+| +| +    const int& operator()(int, int) const;
+| +| +
+| +| +    Matrix rotateClockwise();
+| +| +    Matrix rotateCounterClockwise();
+| +| +    Matrix transpose();
+| +| +};
+| +| +
+| +| +bool operator!=(const Matrix&, const Matrix&);
+| +| +Matrix operator+(const Matrix&, const Matrix&);
+| +| +Matrix operator*(int, const Matrix&);
+| +| +Matrix operator*(const Matrix&, int);
+| +| +Matrix operator*(const Matrix&, const Matrix&);
+| +| +Matrix operator-(const Matrix&, const Matrix&);
+| +| +
+| +| +
+| +| +
+| +| +
+| +| +
+| +| 
+| +* commit a4c954a3d77adff7c45bab8b97d133d8dcb382d7
+| +| Author: Adi Harif <adi.harif@campus.technion.ac.il>
+| +| Date:   Sun Jul 7 18:39:14 2024 +0300
+| +| 
+| +|     [Bug Fix] Adds missing include iostream to tests.cpp
+| +| 
+| +| diff --git a/wet/tests.cpp b/wet/tests.cpp
+| +| index 1096726..b2eed07 100644
+| +| --- a/wet/tests.cpp
+| +| +++ b/wet/tests.cpp
+| +| @@ -1,6 +1,7 @@
+| +|  
+| +|  
+| +|  #include <string>
+| +| +#include <iostream>
+| +|  
+| +|  #include "Matrix.h"
+| +|  #include "MataMvidia.h"
+| +| 
+| +* commit a43d71a48a0f89861959865ef26539eb23d4a210
+| +| Author: AdiHarif <adi.harif@campus.technion.ac.il>
+| +| Date:   Fri Jul 5 13:28:31 2024 +0300
+| +| 
+| +|     [Bug Fix] Changes test to conform matrix indexing conventions
+| +| 
+| +| diff --git a/wet/test.expected b/wet/test.expected
+| +| index cec9191..f50f629 100644
+| +| --- a/wet/test.expected
+| +| +++ b/wet/test.expected
+| +| @@ -1,19 +1,19 @@
+| +| -|5|7|
+| +| -|6|8|
+| +| +|5|6|
+| +| +|7|8|
+| +|  
+| +|  Movie Name: MataMatrix
+| +|  Author: Adi Harif
+| +|  
+| +|  Frame 0:
+| +| -|1|3|
+| +| -|2|4|
+| +| +|1|2|
+| +| +|3|4|
+| +|  
+| +|  Frame 1:
+| +| -|5|7|
+| +| -|6|8|
+| +| +|5|6|
+| +| +|7|8|
+| +|  
+| +|  Frame 2:
+| +| -|1|3|
+| +| -|2|4|
+| +| +|1|2|
+| +| +|3|4|
+| +|  
+| +|  -----End of Movie-----
+| +| diff --git a/wet/tests.cpp b/wet/tests.cpp
+| +| index 29d3700..1096726 100644
+| +| --- a/wet/tests.cpp
+| +| +++ b/wet/tests.cpp
+| +| @@ -50,10 +50,10 @@ bool testMatrix(std::ostream& out) {
+| +|  
+| +|      Matrix m4 = m1 * m2;
+| +|      m4 *= 1;
+| +| -    ASSERT_TEST(m4(0,0) == 23);
+| +| -    ASSERT_TEST(m4(0,1) == 34);
+| +| -    ASSERT_TEST(m4(1,0) == 31);
+| +| -    ASSERT_TEST(m4(1,1) == 46);
+| +| +    ASSERT_TEST(m4(0,0) == 19);
+| +| +    ASSERT_TEST(m4(0,1) == 22);
+| +| +    ASSERT_TEST(m4(1,0) == 43);
+| +| +    ASSERT_TEST(m4(1,1) == 50);
+| +|  
+| +|      m1 += m2;
+| +|      m1 *= m2;
+| +|   
+| +| * commit 568c99477019f8cd7db1c7b7f5a9efd4ae0658ff
+| +|/  Author: AdiHarif <adi.harif@campus.technion.ac.il>
+| +|   Date:   Mon Jul 1 06:55:20 2024 +0300
+| +|   
+| +|       Adds Devil Fruit Feature
+| +|   
+| +|   diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| +|   index c96892e..fc3c314 100644
+| +|   --- a/dry/Pirate.cpp
+| +|   +++ b/dry/Pirate.cpp
+| +|   @@ -2,7 +2,7 @@
+| +|    #include "Pirate.h"
+| +|    
+| +|    
+| +|   -Pirate::Pirate(const string& name): name(name) {}
+| +|   +Pirate::Pirate(const string& name, DEVIL_FRUIT devilFruit): name(name), devilFruit(devilFruit) {}
+| +|    
+| +|    
+| +|    void Pirate::setName(const string& name){
+| +|   @@ -10,12 +10,32 @@ void Pirate::setName(const string& name){
+| +|    }
+| +|    
+| +|    
+| +|   +void Pirate::setDevilFruit(DEVIL_FRUIT devilFruit){
+| +|   +    this->devilFruit = devilFruit;
+| +|   +}
+| +|   +
+| +|   +
+| +|    std::string Pirate::getName(){
+| +|        return name;
+| +|    }
+| +|    
+| +|    
+| +|   +DEVIL_FRUIT Pirate::getDevilFruit(){
+| +|   +    return devilFruit;
+| +|   +}
+| +|   +
+| +|   +
+| +|   +const char* const devilFruitNames[] = {
+| +|   +    "Gum Gum",
+| +|   +    "Smoke Smoke",
+| +|   +    "Flame Flame",
+| +|   +    "Rumble Rumble",
+| +|   +    "String String",
+| +|   +    "Ice Ice",
+| +|   +    "None"
+| +|   +};
+| +|   +
+| +|    std::ostream &operator<<(std::ostream &os, const Pirate &pirate){
+| +|   -    os << pirate.name;
+| +|   +    os << pirate.name << " (Devil Fruit: " << devilFruitNames[pirate.devilFruit] << ")";
+| +|        return os;
+| +|    }
+| +|   diff --git a/dry/Pirate.h b/dry/Pirate.h
+| +|   index 7769667..4c044b1 100644
+| +|   --- a/dry/Pirate.h
+| +|   +++ b/dry/Pirate.h
+| +|   @@ -5,18 +5,31 @@
+| +|    
+| +|    using std::string;
+| +|    
+| +|   +enum DEVIL_FRUIT {
+| +|   +    GUM_GUM_FRUIT,
+| +|   +    SMOKE_SMOKE_FRUIT,
+| +|   +    FLAME_FLAME_FRUIT,
+| +|   +    RUMBLE_RUMBLE_FRUIT,
+| +|   +    STRING_STRING_FRUIT,
+| +|   +    ICE_ICE_FRUIT,
+| +|   +    NONE
+| +|   +};
+| +|   +
+| +|    class Pirate {
+| +|    private:
+| +|        string name;
+| +|   +    DEVIL_FRUIT devilFruit;
+| +|    
+| +|    public:
+| +|   -    Pirate(const string& name);
+| +|   +    Pirate(const string& name, DEVIL_FRUIT devilFruit = DEVIL_FRUIT::NONE);
+| +|    
+| +|        ~Pirate() = default;
+| +|    
+| +|        void setName(const string& name);
+| +|   +    void setDevilFruit(DEVIL_FRUIT devilFruit);
+| +|    
+| +|        string getName();
+| +|   +    DEVIL_FRUIT getDevilFruit();
+| +|    
+| +|        friend std::ostream &operator<<(std::ostream &os, const Pirate &pirate);
+| +|    };
+| +|   diff --git a/dry/main.cpp b/dry/main.cpp
+| +|   index 6b659a1..2911f71 100644
+| +|   --- a/dry/main.cpp
+| +|   +++ b/dry/main.cpp
+| +|   @@ -7,7 +7,7 @@ using std::cout, std::endl;
+| +|    
+| +|    int main() {
+| +|    
+| +|   -    Pirate luffy("Luffy");
+| +|   +    Pirate luffy("Luffy", GUM_GUM_FRUIT);
+| +|        Pirate zoro("Zoro");
+| +|    
+| +|        const int crewSize = 2;
+| +| 
+| +* commit 6a3961cca0991920b83a3e221eccfed187c75d2f
+| +| Author: AdiHarif <adi.harif@campus.technion.ac.il>
+| +| Date:   Mon Jul 1 06:33:07 2024 +0300
+| +| 
+| +|     Adds dry part supplied files
+| +| 
+| +| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| +| new file mode 100644
+| +| index 0000000..c96892e
+| +| --- /dev/null
+| +| +++ b/dry/Pirate.cpp
+| +| @@ -0,0 +1,21 @@
+| +| +
+| +| +#include "Pirate.h"
+| +| +
+| +| +
+| +| +Pirate::Pirate(const string& name): name(name) {}
+| +| +
+| +| +
+| +| +void Pirate::setName(const string& name){
+| +| +    this->name = name;
+| +| +}
+| +| +
+| +| +
+| +| +std::string Pirate::getName(){
+| +| +    return name;
+| +| +}
+| +| +
+| +| +
+| +| +std::ostream &operator<<(std::ostream &os, const Pirate &pirate){
+| +| +    os << pirate.name;
+| +| +    return os;
+| +| +}
+| +| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| +| new file mode 100644
+| +| index 0000000..7769667
+| +| --- /dev/null
+| +| +++ b/dry/Pirate.h
+| +| @@ -0,0 +1,22 @@
+| +| +
+| +| +#pragma once
+| +| +
+| +| +#include <iostream>
+| +| +
+| +| +using std::string;
+| +| +
+| +| +class Pirate {
+| +| +private:
+| +| +    string name;
+| +| +
+| +| +public:
+| +| +    Pirate(const string& name);
+| +| +
+| +| +    ~Pirate() = default;
+| +| +
+| +| +    void setName(const string& name);
+| +| +
+| +| +    string getName();
+| +| +
+| +| +    friend std::ostream &operator<<(std::ostream &os, const Pirate &pirate);
+| +| +};
+| +| diff --git a/dry/main.cpp b/dry/main.cpp
+| +| new file mode 100644
+| +| index 0000000..6b659a1
+| +| --- /dev/null
+| +| +++ b/dry/main.cpp
+| +| @@ -0,0 +1,25 @@
+| +| +#include <iostream>
+| +| +#include "Pirate.h"
+| +| +#include <cstring>
+| +| +
+| +| +using std::cout, std::endl;
+| +| +
+| +| +
+| +| +int main() {
+| +| +
+| +| +    Pirate luffy("Luffy");
+| +| +    Pirate zoro("Zoro");
+| +| +
+| +| +    const int crewSize = 2;
+| +| +    
+| +| +    Pirate strawHatCrew[2];
+| +| +    strawHatCrew[0] = luffy;
+| +| +    strawHatCrew[1] = zoro;
+| +| +    
+| +| +    cout << "Straw Hat crew contains:" << endl;
+| +| +    for (int i = 0; i < crewSize; i++) {
+| +| +        cout << strawHatCrew[i] << endl;
+| +| +    }
+| +| +
+| +| +    return 0;
+| +| +}
+| +| 
+| +* commit 4c85f22824d4e2b99a1bf5c9a25a2a8bf5438e00
+| +| Author: AdiHarif <adi.harif@campus.technion.ac.il>
+| +| Date:   Mon Jul 1 06:32:00 2024 +0300
+| +| 
+| +|     Adds wet part supplied files
+| +| 
+| +| diff --git a/wet/Utilities.cpp b/wet/Utilities.cpp
+| +| new file mode 100644
+| +| index 0000000..6a31ec7
+| +| --- /dev/null
+| +| +++ b/wet/Utilities.cpp
+| +| @@ -0,0 +1,20 @@
+| +| +
+| +| +#include "Utilities.h"
+| +| +
+| +| +#include <iostream>
+| +| +
+| +| +using std::cerr;
+| +| +
+| +| +
+| +| +void exitWithError(MatamErrorType error) {
+| +| +    std::cerr << "Matam Error: ";
+| +| +    switch (error) {
+| +| +        case MatamErrorType::UnmatchedSizes:
+| +| +            std::cerr << "Unmatched matrices" << std::endl;
+| +| +            break;
+| +| +        case MatamErrorType::OutOfBounds:
+| +| +            std::cerr << "Out of bounds" << std::endl;
+| +| +            break;
+| +| +    }
+| +| +    exit(1);
+| +| +}
+| +| diff --git a/wet/Utilities.h b/wet/Utilities.h
+| +| new file mode 100644
+| +| index 0000000..984505a
+| +| --- /dev/null
+| +| +++ b/wet/Utilities.h
+| +| @@ -0,0 +1,9 @@
+| +| +
+| +| +#pragma once
+| +| +
+| +| +enum class MatamErrorType {
+| +| +    UnmatchedSizes,
+| +| +    OutOfBounds
+| +| +};
+| +| +
+| +| +void exitWithError(MatamErrorType error);
+| +| diff --git a/wet/test.expected b/wet/test.expected
+| +| new file mode 100644
+| +| index 0000000..cec9191
+| +| --- /dev/null
+| +| +++ b/wet/test.expected
+| +| @@ -0,0 +1,19 @@
+| +| +|5|7|
+| +| +|6|8|
+| +| +
+| +| +Movie Name: MataMatrix
+| +| +Author: Adi Harif
+| +| +
+| +| +Frame 0:
+| +| +|1|3|
+| +| +|2|4|
+| +| +
+| +| +Frame 1:
+| +| +|5|7|
+| +| +|6|8|
+| +| +
+| +| +Frame 2:
+| +| +|1|3|
+| +| +|2|4|
+| +| +
+| +| +-----End of Movie-----
+| +| diff --git a/wet/tests.cpp b/wet/tests.cpp
+| +| new file mode 100644
+| +| index 0000000..29d3700
+| +| --- /dev/null
+| +| +++ b/wet/tests.cpp
+| +| @@ -0,0 +1,129 @@
+| +| +
+| +| +
+| +| +#include <string>
+| +| +
+| +| +#include "Matrix.h"
+| +| +#include "MataMvidia.h"
+| +| +
+| +| +using namespace std;
+| +| +typedef bool (*testFunc)(void);
+| +| +
+| +| +bool testMatrix(std::ostream& out);
+| +| +bool testMataMvidia(std::ostream& out);
+| +| +
+| +| +
+| +| +#define ASSERT_TEST(expr)                                                      \
+| +| +do {                                                                           \
+| +| +    if (!(expr)) {                                                             \
+| +| +        std::cout << "\nAssertion failed at ";                                 \
+| +| +        std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr << std::endl;\
+| +| +        exit(1);                                                               \
+| +| +    }                                                                          \
+| +| +} while (0)
+| +| +
+| +| +
+| +| +int main() {
+| +| +    testMatrix(std::cout);
+| +| +    testMataMvidia(std::cout);
+| +| +    return 0;
+| +| +}
+| +| +
+| +| +bool testMatrix(std::ostream& out) {
+| +| +    Matrix m1(2,2);
+| +| +    Matrix m2(2,2);
+| +| +
+| +| +    m1(0,0) = 1;
+| +| +    m1(0,1) = 2;
+| +| +    m1(1,0) = 3;
+| +| +    m1(1,1) = 4;
+| +| +
+| +| +    m2(0,0) = 5;
+| +| +    m2(0,1) = 6;
+| +| +    m2(1,0) = 7;
+| +| +    m2(1,1) = 8;
+| +| +
+| +| +    Matrix m3 = m1 + m2;
+| +| +    ASSERT_TEST(m3(0,0) == 6);
+| +| +    ASSERT_TEST(m3(0,1) == 8);
+| +| +    ASSERT_TEST(m3(1,0) == 10);
+| +| +    ASSERT_TEST(m3(1,1) == 12);
+| +| +
+| +| +    Matrix m4 = m1 * m2;
+| +| +    m4 *= 1;
+| +| +    ASSERT_TEST(m4(0,0) == 23);
+| +| +    ASSERT_TEST(m4(0,1) == 34);
+| +| +    ASSERT_TEST(m4(1,0) == 31);
+| +| +    ASSERT_TEST(m4(1,1) == 46);
+| +| +
+| +| +    m1 += m2;
+| +| +    m1 *= m2;
+| +| +    m1 -= m2;
+| +| +    m1 = m3 - m2;
+| +| +
+| +| +    ASSERT_TEST(-m1 == -1*m1);
+| +| +    ASSERT_TEST(-m1 == m1*-1);
+| +| +
+| +| +    ASSERT_TEST(m2.rotateClockwise().rotateCounterClockwise() == m2);
+| +| +
+| +| +    ASSERT_TEST(m1.transpose().transpose() == m1);
+| +| +
+| +| +    out << m2 << std::endl;
+| +| +
+| +| +    return true;
+| +| +}
+| +| +
+| +| +bool testMataMvidia(std::ostream& out) {
+| +| +    Matrix frame1(2,2);
+| +| +    Matrix frame2(2,2);
+| +| +
+| +| +    frame1(0,0) = 1;
+| +| +    frame1(0,1) = 2;
+| +| +    frame1(1,0) = 3;
+| +| +    frame1(1,1) = 4;
+| +| +
+| +| +    frame2(0,0) = 5;
+| +| +    frame2(0,1) = 6;
+| +| +    frame2(1,0) = 7;
+| +| +    frame2(1,1) = 8;
+| +| +
+| +| +    Matrix array[2];
+| +| +    array[0] = frame1;
+| +| +    array[1] = frame2;
+| +| +
+| +| +    MataMvidia movie("MataMatrix","Adi Harif",array, 2);
+| +| +
+| +| +    ASSERT_TEST(movie[0] == frame1);
+| +| +
+| +| +    movie += frame1;
+| +| +
+| +| +    ASSERT_TEST(movie[2] == frame1);
+| +| +
+| +| +    Matrix frame01(2,2);
+| +| +    Matrix frame11(2,2);
+| +| +
+| +| +    frame01(0,0) = 10;
+| +| +    frame01(0,1) = 20;
+| +| +    frame01(1,0) = 30;
+| +| +    frame01(1,1) = 40;
+| +| +
+| +| +    frame11(0,0) = 50;
+| +| +    frame11(0,1) = 60;
+| +| +    frame11(1,0) = 70;
+| +| +    frame11(1,1) = 80;
+| +| +
+| +| +    Matrix array1[2];
+| +| +    array1[0] = frame01;
+| +| +    array1[1] = frame11;
+| +| +
+| +| +    MataMvidia movie1("MataMatrix and the chamber of secrets","Adi Harif",array1, 2);
+| +| +
+| +| +    ASSERT_TEST(movie1[0] == frame01);
+| +| +
+| +| +    //test output
+| +| +    out << movie;
+| +| +
+| +| +    MataMvidia movie2 = movie + movie1;
+| +| +    movie += movie1;
+| +| +
+| +| +    return true;
+| +| +}
+| +| 
+| +* commit baae84e2cdd2960caa8258a8a7fb56f86253114b
+| +  Author: AdiHarif <adi.harif@campus.technion.ac.il>
+| +  Date:   Mon Jul 1 06:30:35 2024 +0300
+| +  
+| +      Initial Commit - Adds README.md
+| +  
+| +  diff --git a/README.md b/README.md
+| +  new file mode 100644
+| +  index 0000000..29b9a75
+| +  --- /dev/null
+| +  +++ b/README.md
+| +  @@ -0,0 +1,7 @@
+| +  +# Matam Homework 2
+| +  +
+| +  +This repository contains all supplied files for the second homework assignment in the course "Introduction to Systems Programming" (234124) at the Technion.
+| +  +
+| +  +You may find the full instructions for this assignment on the [course's website](https://moodle2324.technion.ac.il/course/view.php?id=3205).
+| +  +
+| +  +Good luck and have fun!
+| 
+* commit b2b47a97a554f2817497f9af3c04686cbd9fa28e
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Tue Jul 16 19:12:28 2024 +0300
+| 
+|     [Update] Minor code improvements
+| 
+| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| index a04a7b7..d0618f3 100644
+| --- a/dry/Pirate.cpp
+| +++ b/dry/Pirate.cpp
+| @@ -2,7 +2,7 @@
+|  #include "Pirate.h"
+|  
+|  
+| -Pirate::Pirate() : bounty(0), ownedDevilFruit(Secret_fruit) {}
+| +Pirate::Pirate() : bounty(0), ownedDevilFruit(SECRET_FRUIT) {}
+|  
+|  
+|  Pirate::Pirate(const string& name,
+| @@ -16,7 +16,7 @@ void Pirate::setName(const string& name){
+|  }
+|  
+|  
+| -std::string Pirate::getName(){
+| +std::string Pirate::getName() const {
+|      return name;
+|  }
+|  
+| @@ -36,11 +36,11 @@ void Pirate::setDevilFruit(const DEVIL_FRUIT devilFruit) {
+|  
+|  
+|  std::string Pirate::getDevilFruit() const {
+| -    if (ownedDevilFruit == Paramecia)
+| +    if (ownedDevilFruit == PARAMECIA)
+|          return "Paramecia";
+| -    if (ownedDevilFruit == Zoan)
+| +    if (ownedDevilFruit == ZOAN)
+|          return "Zoan";
+| -    return "secret_fruit";
+| +    return "Secret Fruit";
+|  }
+|  
+|  
+| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| index e0cda4e..5358e29 100644
+| --- a/dry/Pirate.h
+| +++ b/dry/Pirate.h
+| @@ -6,10 +6,10 @@
+|  using std::string;
+|  
+|  enum DEVIL_FRUIT {
+| -    Paramecia,
+| -    Zoan,
+| -    Logia,
+| -    Secret_fruit
+| +    PARAMECIA,
+| +    ZOAN,
+| +    LOGIA,
+| +    SECRET_FRUIT
+|  };
+|  
+|  class Pirate {
+| @@ -25,7 +25,7 @@ public:
+|      ~Pirate() = default;
+|  
+|      void setName(const string& name);
+| -    string getName();
+| +    string getName() const;
+|  
+|      void setBounty(int bounty);
+|      int getBounty() const;
+| diff --git a/dry/main.cpp b/dry/main.cpp
+| index 77d2e11..6514398 100644
+| --- a/dry/main.cpp
+| +++ b/dry/main.cpp
+| @@ -7,8 +7,8 @@ using std::cout, std::endl;
+|  
+|  int main() {
+|  
+| -    Pirate luffy("Luffy", 1000000, Paramecia);
+| -    Pirate zoro("Zoro", 500000, Zoan);
+| +    Pirate luffy("Luffy", 1000000, PARAMECIA);
+| +    Pirate zoro("Zoro", 500000, ZOAN);
+|  
+|      const int crewSize = 2;
+|      
+| 
+* commit 9c4b35e1c83c84bde57d6f7908712d3414600ae1
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Tue Jul 16 16:56:55 2024 +0300
+| 
+|     [Fixed Bug] in c'tor
+| 
+| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| index 8425fb4..a04a7b7 100644
+| --- a/dry/Pirate.cpp
+| +++ b/dry/Pirate.cpp
+| @@ -2,7 +2,7 @@
+|  #include "Pirate.h"
+|  
+|  
+| -Pirate::Pirate() : bounty(0), ownedDevilFruit(secret_fruit) {}
+| +Pirate::Pirate() : bounty(0), ownedDevilFruit(Secret_fruit) {}
+|  
+|  
+|  Pirate::Pirate(const string& name,
+|   
+*   commit a03c64408ce9ff25cf3a7f2771b3b70c2b20ae1f
+|\  Merge: b62b14f 2f70da0
+| | Author: elhannanc <elhannanc@campus.technion.ac.il>
+| | Date:   Tue Jul 16 16:50:31 2024 +0300
+| | 
+| |     Merge branch 'devil_fruit'
+| | 
+| * commit 2f70da02b2e1e33d81d55d61b1e249baf4138927
+| | Author: elhannanc <elhannanc@campus.technion.ac.il>
+| | Date:   Tue Jul 16 16:39:05 2024 +0300
+| | 
+| |     [Update] Added Devil Fruit Special Names
+| | 
+| | diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| | index 83483a3..8425fb4 100644
+| | --- a/dry/Pirate.cpp
+| | +++ b/dry/Pirate.cpp
+| | @@ -36,10 +36,10 @@ void Pirate::setDevilFruit(const DEVIL_FRUIT devilFruit) {
+| |  
+| |  
+| |  std::string Pirate::getDevilFruit() const {
+| | -    if (ownedDevilFruit == fruit_1)
+| | -        return "fruit_1";
+| | -    if (ownedDevilFruit == fruit_2)
+| | -        return "fruit_2";
+| | +    if (ownedDevilFruit == Paramecia)
+| | +        return "Paramecia";
+| | +    if (ownedDevilFruit == Zoan)
+| | +        return "Zoan";
+| |      return "secret_fruit";
+| |  }
+| |  
+| | diff --git a/dry/Pirate.h b/dry/Pirate.h
+| | index b2a31f6..fb3c2f3 100644
+| | --- a/dry/Pirate.h
+| | +++ b/dry/Pirate.h
+| | @@ -6,8 +6,8 @@
+| |  using std::string;
+| |  
+| |  enum DEVIL_FRUIT {
+| | -    fruit_1,
+| | -    fruit_2,
+| | +    Paramecia,
+| | +    Zoan,
+| |      secret_fruit
+| |  };
+| |  
+| | diff --git a/dry/main.cpp b/dry/main.cpp
+| | index 25b72c6..77d2e11 100644
+| | --- a/dry/main.cpp
+| | +++ b/dry/main.cpp
+| | @@ -7,8 +7,8 @@ using std::cout, std::endl;
+| |  
+| |  int main() {
+| |  
+| | -    Pirate luffy("Luffy", 1000000, fruit_1);
+| | -    Pirate zoro("Zoro", 500000, fruit_2);
+| | +    Pirate luffy("Luffy", 1000000, Paramecia);
+| | +    Pirate zoro("Zoro", 500000, Zoan);
+| |  
+| |      const int crewSize = 2;
+| |      
+| | 
+* | commit b62b14f60e55beaea3aba0608b44641feb70511e
+|/  Author: elhannanc <elhannanc@campus.technion.ac.il>
+|   Date:   Tue Jul 16 16:42:47 2024 +0300
+|   
+|       [Update] Added Devil Fruit Logia
+|   
+|   diff --git a/dry/Pirate.h b/dry/Pirate.h
+|   index b2a31f6..7f3d514 100644
+|   --- a/dry/Pirate.h
+|   +++ b/dry/Pirate.h
+|   @@ -8,6 +8,7 @@ using std::string;
+|    enum DEVIL_FRUIT {
+|        fruit_1,
+|        fruit_2,
+|   +    Logia,
+|        secret_fruit
+|    };
+|    
+| 
+* commit cba92732f26ad32fd3d64869410b2232b053170c
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Tue Jul 16 16:25:54 2024 +0300
+| 
+|     [Update] Minor Code Improvments
+| 
+| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| index 4632278..83483a3 100644
+| --- a/dry/Pirate.cpp
+| +++ b/dry/Pirate.cpp
+| @@ -2,7 +2,7 @@
+|  #include "Pirate.h"
+|  
+|  
+| -Pirate::Pirate() : bounty(0) {}
+| +Pirate::Pirate() : bounty(0), ownedDevilFruit(secret_fruit) {}
+|  
+|  
+|  Pirate::Pirate(const string& name,
+| @@ -40,13 +40,11 @@ std::string Pirate::getDevilFruit() const {
+|          return "fruit_1";
+|      if (ownedDevilFruit == fruit_2)
+|          return "fruit_2";
+| -    if (ownedDevilFruit == fruit_3)
+| -        return "fruit_3";
+|      return "secret_fruit";
+|  }
+|  
+|  
+| -std::ostream &operator<<(std::ostream &os, const Pirate &pirate){
+| +std::ostream &operator<<(std::ostream &os, const Pirate &pirate) {
+|      os << "Pirate " << pirate.name << ":"<< std::endl;
+|      os << "Head Bounty: " << pirate.bounty << std::endl;
+|      os << "Owned Devil-Fruit: " << pirate.getDevilFruit();
+| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| index 99c1e50..b2a31f6 100644
+| --- a/dry/Pirate.h
+| +++ b/dry/Pirate.h
+| @@ -8,7 +8,6 @@ using std::string;
+|  enum DEVIL_FRUIT {
+|      fruit_1,
+|      fruit_2,
+| -    fruit_3,
+|      secret_fruit
+|  };
+|  
+| 
+* commit 8606d66050309d72a4b33efed0fd7c439f02017c
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Tue Jul 16 00:22:50 2024 +0300
+| 
+|     [Added Feature] New field DEVIL_FRUIT + methods
+| 
+| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| index 4b34d5f..4632278 100644
+| --- a/dry/Pirate.cpp
+| +++ b/dry/Pirate.cpp
+| @@ -5,8 +5,10 @@
+|  Pirate::Pirate() : bounty(0) {}
+|  
+|  
+| -Pirate::Pirate(const string& name, const int bounty):
+| -    name(name), bounty(bounty) {}
+| +Pirate::Pirate(const string& name,
+| +    const int bounty,
+| +    const DEVIL_FRUIT devilFruit):
+| +    name(name), bounty(bounty), ownedDevilFruit(devilFruit) {}
+|  
+|  
+|  void Pirate::setName(const string& name){
+| @@ -28,10 +30,26 @@ int Pirate::getBounty() const {
+|      return bounty;
+|  }
+|  
+| +void Pirate::setDevilFruit(const DEVIL_FRUIT devilFruit) {
+| +    this->ownedDevilFruit = devilFruit;
+| +}
+| +
+| +
+| +std::string Pirate::getDevilFruit() const {
+| +    if (ownedDevilFruit == fruit_1)
+| +        return "fruit_1";
+| +    if (ownedDevilFruit == fruit_2)
+| +        return "fruit_2";
+| +    if (ownedDevilFruit == fruit_3)
+| +        return "fruit_3";
+| +    return "secret_fruit";
+| +}
+| +
+|  
+|  std::ostream &operator<<(std::ostream &os, const Pirate &pirate){
+| -    os << "Pirate: " << pirate.name << std::endl;
+| -    os << "Bounty: " << pirate.bounty;
+| +    os << "Pirate " << pirate.name << ":"<< std::endl;
+| +    os << "Head Bounty: " << pirate.bounty << std::endl;
+| +    os << "Owned Devil-Fruit: " << pirate.getDevilFruit();
+|      return os;
+|  }
+|  
+| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| index 35fcd58..99c1e50 100644
+| --- a/dry/Pirate.h
+| +++ b/dry/Pirate.h
+| @@ -5,15 +5,23 @@
+|  
+|  using std::string;
+|  
+| +enum DEVIL_FRUIT {
+| +    fruit_1,
+| +    fruit_2,
+| +    fruit_3,
+| +    secret_fruit
+| +};
+| +
+|  class Pirate {
+|  
+|      string name;
+|      int bounty;
+| +    DEVIL_FRUIT ownedDevilFruit;
+|  
+|  public:
+|  
+|      Pirate();
+| -    Pirate(const string& name, int bounty);
+| +    Pirate(const string& name, int bounty, DEVIL_FRUIT devilFruit);
+|      ~Pirate() = default;
+|  
+|      void setName(const string& name);
+| @@ -22,5 +30,8 @@ public:
+|      void setBounty(int bounty);
+|      int getBounty() const;
+|  
+| +    void setDevilFruit(DEVIL_FRUIT devilFruit);
+| +    string getDevilFruit() const;
+| +
+|      friend std::ostream &operator<<(std::ostream &os, const Pirate &pirate);
+|  };
+| diff --git a/dry/main.cpp b/dry/main.cpp
+| index 56c480c..25b72c6 100644
+| --- a/dry/main.cpp
+| +++ b/dry/main.cpp
+| @@ -7,8 +7,8 @@ using std::cout, std::endl;
+|  
+|  int main() {
+|  
+| -    Pirate luffy("Luffy", 1000000);
+| -    Pirate zoro("Zoro", 500000);
+| +    Pirate luffy("Luffy", 1000000, fruit_1);
+| +    Pirate zoro("Zoro", 500000, fruit_2);
+|  
+|      const int crewSize = 2;
+|      
+| 
+* commit 77f66d113e19e3492b3ecd01b0f63521f9e30e14
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Mon Jul 15 23:33:07 2024 +0300
+| 
+|     [Added Features] New Field bounty + methods
+| 
+| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| index c96892e..4b34d5f 100644
+| --- a/dry/Pirate.cpp
+| +++ b/dry/Pirate.cpp
+| @@ -2,7 +2,11 @@
+|  #include "Pirate.h"
+|  
+|  
+| -Pirate::Pirate(const string& name): name(name) {}
+| +Pirate::Pirate() : bounty(0) {}
+| +
+| +
+| +Pirate::Pirate(const string& name, const int bounty):
+| +    name(name), bounty(bounty) {}
+|  
+|  
+|  void Pirate::setName(const string& name){
+| @@ -15,7 +19,19 @@ std::string Pirate::getName(){
+|  }
+|  
+|  
+| +void Pirate::setBounty(const int bounty) {
+| +    this->bounty = bounty;
+| +}
+| +
+| +
+| +int Pirate::getBounty() const {
+| +    return bounty;
+| +}
+| +
+| +
+|  std::ostream &operator<<(std::ostream &os, const Pirate &pirate){
+| -    os << pirate.name;
+| +    os << "Pirate: " << pirate.name << std::endl;
+| +    os << "Bounty: " << pirate.bounty;
+|      return os;
+|  }
+| +
+| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| index 7769667..35fcd58 100644
+| --- a/dry/Pirate.h
+| +++ b/dry/Pirate.h
+| @@ -6,17 +6,21 @@
+|  using std::string;
+|  
+|  class Pirate {
+| -private:
+| +
+|      string name;
+| +    int bounty;
+|  
+|  public:
+| -    Pirate(const string& name);
+|  
+| +    Pirate();
+| +    Pirate(const string& name, int bounty);
+|      ~Pirate() = default;
+|  
+|      void setName(const string& name);
+| -
+|      string getName();
+|  
+| +    void setBounty(int bounty);
+| +    int getBounty() const;
+| +
+|      friend std::ostream &operator<<(std::ostream &os, const Pirate &pirate);
+|  };
+| diff --git a/dry/main.cpp b/dry/main.cpp
+| index 6b659a1..56c480c 100644
+| --- a/dry/main.cpp
+| +++ b/dry/main.cpp
+| @@ -7,8 +7,8 @@ using std::cout, std::endl;
+|  
+|  int main() {
+|  
+| -    Pirate luffy("Luffy");
+| -    Pirate zoro("Zoro");
+| +    Pirate luffy("Luffy", 1000000);
+| +    Pirate zoro("Zoro", 500000);
+|  
+|      const int crewSize = 2;
+|      
+| 
+* commit 2add635f9be6dfa2d6726a435934100bf245afb9
+| Author: elhannanc <elhannanc@campus.technion.ac.il>
+| Date:   Mon Jul 15 21:20:53 2024 +0300
+| 
+|     A working version passed tests + valgrind
+| 
+| diff --git a/wet/MataMvidia.cpp b/wet/MataMvidia.cpp
+| new file mode 100644
+| index 0000000..684519a
+| --- /dev/null
+| +++ b/wet/MataMvidia.cpp
+| @@ -0,0 +1,132 @@
+| +
+| +#include "MataMvidia.h"
+| +
+| +//****************************************************************************//
+| +
+| +MataMvidia::MataMvidia(std::string  str1,
+| +                       std::string  str2,
+| +                       const Matrix* array, const int n) :
+| +    movieName(std::move(str1)),
+| +    author(std::move(str2)),
+| +    frames(new Matrix[n]),
+| +    length(n),
+| +    maxSize(n)
+| +{
+| +    for (int i = 0; i < n; i++) {
+| +        frames[i] = array[i];
+| +    }
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +MataMvidia::MataMvidia(const MataMvidia& movie) :
+| +    movieName(movie.movieName),
+| +    author(movie.author),
+| +    frames(new Matrix[movie.maxSize]),
+| +    length(movie.length),
+| +    maxSize(movie.maxSize)
+| +{
+| +    for (int i = 0; i < length; i++) {
+| +        frames[i] = movie.frames[i];
+| +    }
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +MataMvidia::~MataMvidia()
+| +{
+| +    delete[] frames;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +std::ostream& operator<<(std::ostream& os, const MataMvidia& movie)
+| +{
+| +    os << "Movie Name: " << movie.movieName << std::endl;
+| +    os << "Author: " << movie.author << std::endl;
+| +    for (int i = 0; i < movie.length; i++) {
+| +        os << std::endl << "Frame " << i << ":" << std::endl;
+| +        os << movie.frames[i];
+| +    }
+| +    os << std::endl << "-----End of Movie-----" << std::endl;
+| +    return os;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +MataMvidia& MataMvidia::operator=(const MataMvidia& movie)
+| +{
+| +    if (this != &movie) {
+| +        movieName = movie.movieName;
+| +        author = movie.author;
+| +        delete[] frames;
+| +        frames = new Matrix[movie.maxSize];
+| +        length = movie.length;
+| +        for (int i = 0; i < length; i++) {
+| +            frames[i] = movie.frames[i];
+| +        }
+| +    }
+| +    return *this;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +MataMvidia& MataMvidia::operator+=(const Matrix& matrix)
+| +{
+| +    if (maxSize <= length) {
+| +        auto* temp = new Matrix[length];
+| +        for (int i = 0; i < length; i++) {
+| +            temp[i] = frames[i];
+| +        }
+| +        delete[] frames;
+| +        maxSize = EXPAND_RATE * length;
+| +        frames = new Matrix[maxSize];
+| +        for (int i = 0; i < length; i++) {
+| +            frames[i] = temp[i];
+| +        }
+| +        delete[] temp;
+| +    }
+| +    frames[length] = matrix;
+| +    length += 1;
+| +    return *this;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +MataMvidia& MataMvidia::operator+=(const MataMvidia& movie)
+| +{
+| +    for (int i = 0; i < movie.length; i++) {
+| +        *this += movie.frames[i];
+| +    }
+| +    return *this;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +MataMvidia operator+(const MataMvidia& a, const MataMvidia& b)
+| +{
+| +    MataMvidia result(a);
+| +    return result += b;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix& MataMvidia::operator[](const int index)
+| +{
+| +    if (index < 0 || index >= length) {
+| +        exitWithError(MatamErrorType::OutOfBounds);
+| +    }
+| +    return frames[index];
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +const Matrix& MataMvidia::operator[](const int index) const
+| +{
+| +    if (index < 1 || index >= length) {
+| +        exitWithError(MatamErrorType::OutOfBounds);
+| +    }
+| +    return frames[index];
+| +}
+| +
+| +
+| diff --git a/wet/MataMvidia.h b/wet/MataMvidia.h
+| new file mode 100644
+| index 0000000..37b2dc4
+| --- /dev/null
+| +++ b/wet/MataMvidia.h
+| @@ -0,0 +1,34 @@
+| +#pragma once
+| +
+| +#include "Matrix.h"
+| +#include <string>
+| +#include <ostream>
+| +
+| +
+| +class MataMvidia {
+| +
+| +    std::string movieName;
+| +    std::string author;
+| +    Matrix* frames;
+| +    int length;
+| +    int maxSize;
+| +    static const int EXPAND_RATE = 2;
+| +
+| +public:
+| +
+| +    MataMvidia(std::string, std::string, const Matrix[], int);
+| +    MataMvidia(const MataMvidia&);
+| +    ~MataMvidia();
+| +
+| +    friend std::ostream& operator<<(std::ostream&, const MataMvidia&);
+| +
+| +    MataMvidia& operator=(const MataMvidia&);
+| +    MataMvidia& operator+=(const Matrix&);
+| +    MataMvidia& operator+=(const MataMvidia&);
+| +    Matrix& operator[](int);
+| +    const Matrix& operator[](int) const;
+| +
+| +
+| +};
+| +
+| +MataMvidia operator+(const MataMvidia&, const MataMvidia&);
+| \ No newline at end of file
+| diff --git a/wet/Matrix.cpp b/wet/Matrix.cpp
+| new file mode 100644
+| index 0000000..12e9507
+| --- /dev/null
+| +++ b/wet/Matrix.cpp
+| @@ -0,0 +1,259 @@
+| +
+| +#include "Matrix.h"
+| +
+| +//****************************************************************************//
+| +
+| +Matrix::Matrix() :
+| +    rows(0) , cols(0), pixles(nullptr)
+| +{}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix::Matrix(const int n, const int m = 1) :
+| +    rows(n), cols(m), pixles(new int[n*m])
+| +{
+| +    for (int i = 0; i < n*m; i++)
+| +        pixles[i] = 0;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix::Matrix(const Matrix& matrix) :
+| +    rows(matrix.rows), cols(matrix.cols),
+| +    pixles(new int[matrix.rows * matrix.cols])
+| +{
+| +    for (int i = 0; i < rows * cols; i++)
+| +        pixles[i] = matrix.pixles[i];
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix::~Matrix()
+| +{
+| +    delete[] pixles;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +bool operator==(const Matrix& a, const Matrix& b)
+| +{
+| +    if (a.rows != b.rows || a.cols != b.cols) {
+| +        return false;
+| +    }
+| +    for (int i = 0; i < a.rows * a.cols; i++) {
+| +        if (a.pixles[i] != b.pixles[i]) return false;
+| +    }
+| +    return true;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +bool operator!=(const Matrix& a, const Matrix& b)
+| +{
+| +    return !(a == b);
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +std::ostream& operator<<(std::ostream& os, const Matrix& matrix)
+| +{
+| +    for (int i = 0; i < matrix.rows; i++) {
+| +        for (int j = 0; j < matrix.cols; j++) {
+| +            os << "|" << matrix.pixles[i * matrix.cols + j];
+| +        }
+| +        os << "|" << std::endl;
+| +    }
+| +    return os;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix& Matrix::operator=(const Matrix& matrix)
+| +{
+| +    if (this != &matrix) {
+| +        if (rows != matrix.rows || cols != matrix.cols) {
+| +            rows = matrix.rows;
+| +            cols = matrix.cols;
+| +            delete[] pixles;
+| +            pixles = new int[rows * cols];
+| +        }
+| +        for (int i = 0; i < rows * cols; i++) {
+| +            pixles[i] = matrix.pixles[i];
+| +        }
+| +    }
+| +    return *this;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix& Matrix::operator+=(const Matrix& matrix)
+| +{
+| +    if (rows != matrix.rows && cols != matrix.cols) {
+| +        exitWithError(MatamErrorType::UnmatchedSizes);
+| +    }
+| +    for (int i = 0; i < rows * cols; i++) {
+| +        pixles[i] += matrix.pixles[i];
+| +    }
+| +    return *this;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix operator+(const Matrix& a, const Matrix& b)
+| +{
+| +    Matrix result(a);
+| +    return result += b;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix& Matrix::operator*=(const int scalar)
+| +{
+| +    if (scalar != 1) {
+| +        for (int i = 0; i < rows * cols; i++) {
+| +            pixles[i] *= scalar;
+| +        }
+| +    }
+| +    return *this;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix operator*(const int scalar, const Matrix& matrix)
+| +{
+| +    Matrix result(matrix);
+| +    return result *= scalar;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix operator*(const Matrix& matrix, const int scalar)
+| +{
+| +    return scalar * matrix;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix& Matrix::operator*=(const Matrix& matrix)
+| +{
+| +    if (rows != matrix.cols || cols != matrix.rows) {
+| +        exitWithError(MatamErrorType::UnmatchedSizes);
+| +    }
+| +    Matrix result(rows, matrix.cols);
+| +    for (int i = 0; i < rows; i++) {
+| +        for (int j = 0; j < matrix.cols; j++) {
+| +            for (int k = 0; k < cols; k++) {
+| +                result.pixles[i * matrix.cols + j] +=
+| +                    pixles[i * cols + k] * matrix.pixles[k * matrix.cols + j];
+| +            }
+| +        }
+| +    }
+| +    *this = result;
+| +    return *this;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix operator*(const Matrix& a, const Matrix& b)
+| +{
+| +    Matrix result(a);
+| +    return result *= b;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix Matrix::operator-() const {
+| +    return Matrix(-1 * *this);
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix& Matrix::operator-=(const Matrix& matrix)
+| +{
+| +    return *this += -matrix;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix operator-(const Matrix& a, const Matrix& b)
+| +{
+| +    return a + -1*b;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +int& Matrix::operator()(const int n, const int m)
+| +{
+| +    if (n >= rows || n < 0 || m >= cols || m < 0) {
+| +        exitWithError(MatamErrorType::OutOfBounds);
+| +    }
+| +    return pixles[n * cols + m];
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +const int& Matrix::operator()(const int n, const int m) const
+| +{
+| +    if (n >= rows || n < 0 || m >= cols || m < 0) {
+| +        exitWithError(MatamErrorType::OutOfBounds);
+| +    }
+| +    return pixles[n * cols + m];
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix Matrix::rotateClockwise()
+| +{
+| +    Matrix result(cols, rows);
+| +    for (int i = 0; i < cols; i++) {
+| +        for (int j = 0; j < rows; j++) {
+| +            result(j, rows - i - 1) = (*this)(i, j);
+| +        }
+| +    }
+| +    return result;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix Matrix::rotateCounterClockwise()
+| +{
+| +    Matrix result(cols, rows);
+| +    for (int i = 0; i < cols; i++) {
+| +        for (int j = 0; j < rows; j++) {
+| +            result(cols - j - 1, i) = (*this)(i, j);
+| +        }
+| +    }
+| +    return result;
+| +}
+| +
+| +//****************************************************************************//
+| +
+| +Matrix Matrix::transpose()
+| +{
+| +    Matrix result(cols, rows);
+| +    for (int i = 0; i < cols; i++) {
+| +        for (int j = 0; j < rows; j++) {
+| +            result(j, i) = (*this)(i, j);
+| +        }
+| +    }
+| +    return result;
+| +}
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| +
+| diff --git a/wet/Matrix.h b/wet/Matrix.h
+| new file mode 100644
+| index 0000000..72bee11
+| --- /dev/null
+| +++ b/wet/Matrix.h
+| @@ -0,0 +1,46 @@
+| +#pragma once
+| +
+| +#include "Utilities.h"
+| +#include <ostream>
+| +
+| +class Matrix {
+| +
+| +    int rows;
+| +    int cols;
+| +    int* pixles;
+| +
+| +public:
+| +
+| +    Matrix();
+| +    Matrix(int, int);
+| +    Matrix(const Matrix&);
+| +    ~Matrix();
+| +
+| +    friend bool operator==(const Matrix&, const Matrix&);
+| +    friend std::ostream& operator<<(std::ostream&, const Matrix&);
+| +
+| +    Matrix& operator=(const Matrix&);
+| +    Matrix& operator+=(const Matrix&);
+| +    Matrix& operator*=(int);
+| +    Matrix& operator*=(const Matrix&);
+| +    Matrix operator-() const;
+| +    Matrix& operator-=(const Matrix&);
+| +    int& operator()(int, int);
+| +    const int& operator()(int, int) const;
+| +
+| +    Matrix rotateClockwise();
+| +    Matrix rotateCounterClockwise();
+| +    Matrix transpose();
+| +};
+| +
+| +bool operator!=(const Matrix&, const Matrix&);
+| +Matrix operator+(const Matrix&, const Matrix&);
+| +Matrix operator*(int, const Matrix&);
+| +Matrix operator*(const Matrix&, int);
+| +Matrix operator*(const Matrix&, const Matrix&);
+| +Matrix operator-(const Matrix&, const Matrix&);
+| +
+| +
+| +
+| +
+| +
+| 
+* commit a4c954a3d77adff7c45bab8b97d133d8dcb382d7
+| Author: Adi Harif <adi.harif@campus.technion.ac.il>
+| Date:   Sun Jul 7 18:39:14 2024 +0300
+| 
+|     [Bug Fix] Adds missing include iostream to tests.cpp
+| 
+| diff --git a/wet/tests.cpp b/wet/tests.cpp
+| index 1096726..b2eed07 100644
+| --- a/wet/tests.cpp
+| +++ b/wet/tests.cpp
+| @@ -1,6 +1,7 @@
+|  
+|  
+|  #include <string>
+| +#include <iostream>
+|  
+|  #include "Matrix.h"
+|  #include "MataMvidia.h"
+| 
+* commit a43d71a48a0f89861959865ef26539eb23d4a210
+| Author: AdiHarif <adi.harif@campus.technion.ac.il>
+| Date:   Fri Jul 5 13:28:31 2024 +0300
+| 
+|     [Bug Fix] Changes test to conform matrix indexing conventions
+| 
+| diff --git a/wet/test.expected b/wet/test.expected
+| index cec9191..f50f629 100644
+| --- a/wet/test.expected
+| +++ b/wet/test.expected
+| @@ -1,19 +1,19 @@
+| -|5|7|
+| -|6|8|
+| +|5|6|
+| +|7|8|
+|  
+|  Movie Name: MataMatrix
+|  Author: Adi Harif
+|  
+|  Frame 0:
+| -|1|3|
+| -|2|4|
+| +|1|2|
+| +|3|4|
+|  
+|  Frame 1:
+| -|5|7|
+| -|6|8|
+| +|5|6|
+| +|7|8|
+|  
+|  Frame 2:
+| -|1|3|
+| -|2|4|
+| +|1|2|
+| +|3|4|
+|  
+|  -----End of Movie-----
+| diff --git a/wet/tests.cpp b/wet/tests.cpp
+| index 29d3700..1096726 100644
+| --- a/wet/tests.cpp
+| +++ b/wet/tests.cpp
+| @@ -50,10 +50,10 @@ bool testMatrix(std::ostream& out) {
+|  
+|      Matrix m4 = m1 * m2;
+|      m4 *= 1;
+| -    ASSERT_TEST(m4(0,0) == 23);
+| -    ASSERT_TEST(m4(0,1) == 34);
+| -    ASSERT_TEST(m4(1,0) == 31);
+| -    ASSERT_TEST(m4(1,1) == 46);
+| +    ASSERT_TEST(m4(0,0) == 19);
+| +    ASSERT_TEST(m4(0,1) == 22);
+| +    ASSERT_TEST(m4(1,0) == 43);
+| +    ASSERT_TEST(m4(1,1) == 50);
+|  
+|      m1 += m2;
+|      m1 *= m2;
+|   
+| * commit 568c99477019f8cd7db1c7b7f5a9efd4ae0658ff
+|/  Author: AdiHarif <adi.harif@campus.technion.ac.il>
+|   Date:   Mon Jul 1 06:55:20 2024 +0300
+|   
+|       Adds Devil Fruit Feature
+|   
+|   diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+|   index c96892e..fc3c314 100644
+|   --- a/dry/Pirate.cpp
+|   +++ b/dry/Pirate.cpp
+|   @@ -2,7 +2,7 @@
+|    #include "Pirate.h"
+|    
+|    
+|   -Pirate::Pirate(const string& name): name(name) {}
+|   +Pirate::Pirate(const string& name, DEVIL_FRUIT devilFruit): name(name), devilFruit(devilFruit) {}
+|    
+|    
+|    void Pirate::setName(const string& name){
+|   @@ -10,12 +10,32 @@ void Pirate::setName(const string& name){
+|    }
+|    
+|    
+|   +void Pirate::setDevilFruit(DEVIL_FRUIT devilFruit){
+|   +    this->devilFruit = devilFruit;
+|   +}
+|   +
+|   +
+|    std::string Pirate::getName(){
+|        return name;
+|    }
+|    
+|    
+|   +DEVIL_FRUIT Pirate::getDevilFruit(){
+|   +    return devilFruit;
+|   +}
+|   +
+|   +
+|   +const char* const devilFruitNames[] = {
+|   +    "Gum Gum",
+|   +    "Smoke Smoke",
+|   +    "Flame Flame",
+|   +    "Rumble Rumble",
+|   +    "String String",
+|   +    "Ice Ice",
+|   +    "None"
+|   +};
+|   +
+|    std::ostream &operator<<(std::ostream &os, const Pirate &pirate){
+|   -    os << pirate.name;
+|   +    os << pirate.name << " (Devil Fruit: " << devilFruitNames[pirate.devilFruit] << ")";
+|        return os;
+|    }
+|   diff --git a/dry/Pirate.h b/dry/Pirate.h
+|   index 7769667..4c044b1 100644
+|   --- a/dry/Pirate.h
+|   +++ b/dry/Pirate.h
+|   @@ -5,18 +5,31 @@
+|    
+|    using std::string;
+|    
+|   +enum DEVIL_FRUIT {
+|   +    GUM_GUM_FRUIT,
+|   +    SMOKE_SMOKE_FRUIT,
+|   +    FLAME_FLAME_FRUIT,
+|   +    RUMBLE_RUMBLE_FRUIT,
+|   +    STRING_STRING_FRUIT,
+|   +    ICE_ICE_FRUIT,
+|   +    NONE
+|   +};
+|   +
+|    class Pirate {
+|    private:
+|        string name;
+|   +    DEVIL_FRUIT devilFruit;
+|    
+|    public:
+|   -    Pirate(const string& name);
+|   +    Pirate(const string& name, DEVIL_FRUIT devilFruit = DEVIL_FRUIT::NONE);
+|    
+|        ~Pirate() = default;
+|    
+|        void setName(const string& name);
+|   +    void setDevilFruit(DEVIL_FRUIT devilFruit);
+|    
+|        string getName();
+|   +    DEVIL_FRUIT getDevilFruit();
+|    
+|        friend std::ostream &operator<<(std::ostream &os, const Pirate &pirate);
+|    };
+|   diff --git a/dry/main.cpp b/dry/main.cpp
+|   index 6b659a1..2911f71 100644
+|   --- a/dry/main.cpp
+|   +++ b/dry/main.cpp
+|   @@ -7,7 +7,7 @@ using std::cout, std::endl;
+|    
+|    int main() {
+|    
+|   -    Pirate luffy("Luffy");
+|   +    Pirate luffy("Luffy", GUM_GUM_FRUIT);
+|        Pirate zoro("Zoro");
+|    
+|        const int crewSize = 2;
+| 
+* commit 6a3961cca0991920b83a3e221eccfed187c75d2f
+| Author: AdiHarif <adi.harif@campus.technion.ac.il>
+| Date:   Mon Jul 1 06:33:07 2024 +0300
+| 
+|     Adds dry part supplied files
+| 
+| diff --git a/dry/Pirate.cpp b/dry/Pirate.cpp
+| new file mode 100644
+| index 0000000..c96892e
+| --- /dev/null
+| +++ b/dry/Pirate.cpp
+| @@ -0,0 +1,21 @@
+| +
+| +#include "Pirate.h"
+| +
+| +
+| +Pirate::Pirate(const string& name): name(name) {}
+| +
+| +
+| +void Pirate::setName(const string& name){
+| +    this->name = name;
+| +}
+| +
+| +
+| +std::string Pirate::getName(){
+| +    return name;
+| +}
+| +
+| +
+| +std::ostream &operator<<(std::ostream &os, const Pirate &pirate){
+| +    os << pirate.name;
+| +    return os;
+| +}
+| diff --git a/dry/Pirate.h b/dry/Pirate.h
+| new file mode 100644
+| index 0000000..7769667
+| --- /dev/null
+| +++ b/dry/Pirate.h
+| @@ -0,0 +1,22 @@
+| +
+| +#pragma once
+| +
+| +#include <iostream>
+| +
+| +using std::string;
+| +
+| +class Pirate {
+| +private:
+| +    string name;
+| +
+| +public:
+| +    Pirate(const string& name);
+| +
+| +    ~Pirate() = default;
+| +
+| +    void setName(const string& name);
+| +
+| +    string getName();
+| +
+| +    friend std::ostream &operator<<(std::ostream &os, const Pirate &pirate);
+| +};
+| diff --git a/dry/main.cpp b/dry/main.cpp
+| new file mode 100644
+| index 0000000..6b659a1
+| --- /dev/null
+| +++ b/dry/main.cpp
+| @@ -0,0 +1,25 @@
+| +#include <iostream>
+| +#include "Pirate.h"
+| +#include <cstring>
+| +
+| +using std::cout, std::endl;
+| +
+| +
+| +int main() {
+| +
+| +    Pirate luffy("Luffy");
+| +    Pirate zoro("Zoro");
+| +
+| +    const int crewSize = 2;
+| +    
+| +    Pirate strawHatCrew[2];
+| +    strawHatCrew[0] = luffy;
+| +    strawHatCrew[1] = zoro;
+| +    
+| +    cout << "Straw Hat crew contains:" << endl;
+| +    for (int i = 0; i < crewSize; i++) {
+| +        cout << strawHatCrew[i] << endl;
+| +    }
+| +
+| +    return 0;
+| +}
+| 
+* commit 4c85f22824d4e2b99a1bf5c9a25a2a8bf5438e00
+| Author: AdiHarif <adi.harif@campus.technion.ac.il>
+| Date:   Mon Jul 1 06:32:00 2024 +0300
+| 
+|     Adds wet part supplied files
+| 
+| diff --git a/wet/Utilities.cpp b/wet/Utilities.cpp
+| new file mode 100644
+| index 0000000..6a31ec7
+| --- /dev/null
+| +++ b/wet/Utilities.cpp
+| @@ -0,0 +1,20 @@
+| +
+| +#include "Utilities.h"
+| +
+| +#include <iostream>
+| +
+| +using std::cerr;
+| +
+| +
+| +void exitWithError(MatamErrorType error) {
+| +    std::cerr << "Matam Error: ";
+| +    switch (error) {
+| +        case MatamErrorType::UnmatchedSizes:
+| +            std::cerr << "Unmatched matrices" << std::endl;
+| +            break;
+| +        case MatamErrorType::OutOfBounds:
+| +            std::cerr << "Out of bounds" << std::endl;
+| +            break;
+| +    }
+| +    exit(1);
+| +}
+| diff --git a/wet/Utilities.h b/wet/Utilities.h
+| new file mode 100644
+| index 0000000..984505a
+| --- /dev/null
+| +++ b/wet/Utilities.h
+| @@ -0,0 +1,9 @@
+| +
+| +#pragma once
+| +
+| +enum class MatamErrorType {
+| +    UnmatchedSizes,
+| +    OutOfBounds
+| +};
+| +
+| +void exitWithError(MatamErrorType error);
+| diff --git a/wet/test.expected b/wet/test.expected
+| new file mode 100644
+| index 0000000..cec9191
+| --- /dev/null
+| +++ b/wet/test.expected
+| @@ -0,0 +1,19 @@
+| +|5|7|
+| +|6|8|
+| +
+| +Movie Name: MataMatrix
+| +Author: Adi Harif
+| +
+| +Frame 0:
+| +|1|3|
+| +|2|4|
+| +
+| +Frame 1:
+| +|5|7|
+| +|6|8|
+| +
+| +Frame 2:
+| +|1|3|
+| +|2|4|
+| +
+| +-----End of Movie-----
+| diff --git a/wet/tests.cpp b/wet/tests.cpp
+| new file mode 100644
+| index 0000000..29d3700
+| --- /dev/null
+| +++ b/wet/tests.cpp
+| @@ -0,0 +1,129 @@
+| +
+| +
+| +#include <string>
+| +
+| +#include "Matrix.h"
+| +#include "MataMvidia.h"
+| +
+| +using namespace std;
+| +typedef bool (*testFunc)(void);
+| +
+| +bool testMatrix(std::ostream& out);
+| +bool testMataMvidia(std::ostream& out);
+| +
+| +
+| +#define ASSERT_TEST(expr)                                                      \
+| +do {                                                                           \
+| +    if (!(expr)) {                                                             \
+| +        std::cout << "\nAssertion failed at ";                                 \
+| +        std::cout << __FILE__ << ":" << __LINE__ << ": " << #expr << std::endl;\
+| +        exit(1);                                                               \
+| +    }                                                                          \
+| +} while (0)
+| +
+| +
+| +int main() {
+| +    testMatrix(std::cout);
+| +    testMataMvidia(std::cout);
+| +    return 0;
+| +}
+| +
+| +bool testMatrix(std::ostream& out) {
+| +    Matrix m1(2,2);
+| +    Matrix m2(2,2);
+| +
+| +    m1(0,0) = 1;
+| +    m1(0,1) = 2;
+| +    m1(1,0) = 3;
+| +    m1(1,1) = 4;
+| +
+| +    m2(0,0) = 5;
+| +    m2(0,1) = 6;
+| +    m2(1,0) = 7;
+| +    m2(1,1) = 8;
+| +
+| +    Matrix m3 = m1 + m2;
+| +    ASSERT_TEST(m3(0,0) == 6);
+| +    ASSERT_TEST(m3(0,1) == 8);
+| +    ASSERT_TEST(m3(1,0) == 10);
+| +    ASSERT_TEST(m3(1,1) == 12);
+| +
+| +    Matrix m4 = m1 * m2;
+| +    m4 *= 1;
+| +    ASSERT_TEST(m4(0,0) == 23);
+| +    ASSERT_TEST(m4(0,1) == 34);
+| +    ASSERT_TEST(m4(1,0) == 31);
+| +    ASSERT_TEST(m4(1,1) == 46);
+| +
+| +    m1 += m2;
+| +    m1 *= m2;
+| +    m1 -= m2;
+| +    m1 = m3 - m2;
+| +
+| +    ASSERT_TEST(-m1 == -1*m1);
+| +    ASSERT_TEST(-m1 == m1*-1);
+| +
+| +    ASSERT_TEST(m2.rotateClockwise().rotateCounterClockwise() == m2);
+| +
+| +    ASSERT_TEST(m1.transpose().transpose() == m1);
+| +
+| +    out << m2 << std::endl;
+| +
+| +    return true;
+| +}
+| +
+| +bool testMataMvidia(std::ostream& out) {
+| +    Matrix frame1(2,2);
+| +    Matrix frame2(2,2);
+| +
+| +    frame1(0,0) = 1;
+| +    frame1(0,1) = 2;
+| +    frame1(1,0) = 3;
+| +    frame1(1,1) = 4;
+| +
+| +    frame2(0,0) = 5;
+| +    frame2(0,1) = 6;
+| +    frame2(1,0) = 7;
+| +    frame2(1,1) = 8;
+| +
+| +    Matrix array[2];
+| +    array[0] = frame1;
+| +    array[1] = frame2;
+| +
+| +    MataMvidia movie("MataMatrix","Adi Harif",array, 2);
+| +
+| +    ASSERT_TEST(movie[0] == frame1);
+| +
+| +    movie += frame1;
+| +
+| +    ASSERT_TEST(movie[2] == frame1);
+| +
+| +    Matrix frame01(2,2);
+| +    Matrix frame11(2,2);
+| +
+| +    frame01(0,0) = 10;
+| +    frame01(0,1) = 20;
+| +    frame01(1,0) = 30;
+| +    frame01(1,1) = 40;
+| +
+| +    frame11(0,0) = 50;
+| +    frame11(0,1) = 60;
+| +    frame11(1,0) = 70;
+| +    frame11(1,1) = 80;
+| +
+| +    Matrix array1[2];
+| +    array1[0] = frame01;
+| +    array1[1] = frame11;
+| +
+| +    MataMvidia movie1("MataMatrix and the chamber of secrets","Adi Harif",array1, 2);
+| +
+| +    ASSERT_TEST(movie1[0] == frame01);
+| +
+| +    //test output
+| +    out << movie;
+| +
+| +    MataMvidia movie2 = movie + movie1;
+| +    movie += movie1;
+| +
+| +    return true;
+| +}
+| 
+* commit baae84e2cdd2960caa8258a8a7fb56f86253114b
+  Author: AdiHarif <adi.harif@campus.technion.ac.il>
+  Date:   Mon Jul 1 06:30:35 2024 +0300
+  
+      Initial Commit - Adds README.md
+  
+  diff --git a/README.md b/README.md
+  new file mode 100644
+  index 0000000..29b9a75
+  --- /dev/null
+  +++ b/README.md
+  @@ -0,0 +1,7 @@
+  +# Matam Homework 2
+  +
+  +This repository contains all supplied files for the second homework assignment in the course "Introduction to Systems Programming" (234124) at the Technion.
+  +
+  +You may find the full instructions for this assignment on the [course's website](https://moodle2324.technion.ac.il/course/view.php?id=3205).
+  +
+  +Good luck and have fun!
